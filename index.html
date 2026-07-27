@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FBF8F4">
+<title>ריקי תחדשי לי - קרם הגנה לפי UV אמיתי</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF8F4; --accent:#fbcfbd; --pink:#D4ADA4; --blush:#F0E1DD;
+    --dark:#1A1A1A; --ink-soft:rgba(26,26,26,0.6); --white:#fff; --light:#efefef;
+    --uv-low:#9DBE9C; --uv-mid:#E8C878; --uv-high:#E8A578; --uv-vhigh:#D97C6C;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Heebo',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh}
+  .wrap{max-width:520px;margin:0 auto;padding:28px 18px 60px}
+
+  .top-label{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);text-align:center;margin-bottom:10px}
+  h1{font-size:clamp(1.6rem,5.5vw,2.6rem);font-weight:900;letter-spacing:-.02em;text-align:center;line-height:1.25}
+  h1 .accent-box{background:var(--accent);border-radius:14px;padding:4px 16px 8px;display:inline-block;margin-top:6px}
+  .subtitle{font-weight:300;font-size:.95rem;color:var(--ink-soft);text-align:center;margin:14px auto 26px;max-width:38ch;line-height:1.55}
+
+  .verdict{background:var(--accent);border-radius:22px;padding:24px 22px;text-align:center;font-weight:700;box-shadow:0 4px 16px rgba(26,26,26,.06);position:relative;overflow:hidden}
+  .verdict .leopard{position:absolute;left:14px;bottom:8px;font-size:2.4rem;opacity:.14;pointer-events:none}
+  .verdict .uv-big{font-size:3.2rem;font-weight:900;letter-spacing:-.02em;line-height:1}
+  .verdict .uv-label{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+  .verdict .verdict-text{font-size:1.05rem;font-weight:700;letter-spacing:-.32px;margin-top:10px}
+  .verdict .verdict-sub{font-weight:300;font-size:.9rem;margin-top:6px}
+
+  .btn-primary{background:var(--dark);color:var(--white);border:none;border-radius:10px;padding:13px 24px;font-family:'Heebo';font-weight:700;font-size:.97rem;letter-spacing:-.15px;cursor:pointer;margin-top:16px;width:100%}
+  .btn-primary:active{opacity:.85}
+  .btn-primary:disabled{opacity:.5;cursor:default}
+  .btn-neutral{background:var(--light);color:var(--dark);border:none;border-radius:10px;padding:11px 20px;font-family:'Heebo';font-weight:700;font-size:.88rem;cursor:pointer;margin-top:10px;width:100%}
+
+  .notify-card{background:var(--white);border-radius:16px;border-right:5px solid var(--accent);box-shadow:0 4px 16px rgba(26,26,26,.06);padding:18px 20px;margin-top:16px}
+  .notify-card .n-title{font-size:1rem;font-weight:700;letter-spacing:-.16px}
+  .notify-card .n-body{font-weight:300;font-size:.93rem;line-height:1.55;color:var(--ink-soft);margin-top:4px}
+  .notify-card.on{border-right-color:var(--uv-low)}
+  .ios-steps{background:var(--blush);border-radius:12px;padding:14px 16px;margin-top:12px;font-weight:300;font-size:.9rem;line-height:1.7;display:none}
+  .ios-steps b{font-weight:700}
+
+  .timer-panel{background:var(--blush);border-radius:22px;padding:22px;margin-top:16px;text-align:center;display:none}
+  .timer-panel.show{display:block}
+  .timer-panel .t-label{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .timer-panel .t-time{font-size:2.2rem;font-weight:900;letter-spacing:-.02em;margin:6px 0}
+  .timer-panel .t-note{font-weight:300;font-size:.88rem;color:var(--ink-soft);line-height:1.55}
+
+  .meter-card{background:var(--white);border-radius:16px;box-shadow:0 4px 16px rgba(26,26,26,.06);padding:18px 20px;margin-top:16px;display:none}
+  .meter-card.show{display:block}
+  .meter-card .m-title{font-size:1rem;font-weight:700;letter-spacing:-.16px}
+  .meter-bar{background:var(--light);border-radius:99px;height:12px;margin:12px 0 8px;overflow:hidden}
+  .meter-fill{background:var(--accent);height:100%;border-radius:99px;transition:width .4s}
+  .meter-card .m-body{font-weight:300;font-size:.9rem;color:var(--ink-soft);line-height:1.55}
+  .meter-card .m-link{display:none;margin-top:10px;font-size:.92rem;font-weight:700}
+  .meter-card .m-link a{color:var(--dark)}
+  .meter-card.low .m-link{display:block}
+  .meter-card.low .meter-fill{background:var(--uv-vhigh)}
+  .m-reset{background:none;border:none;font-family:'Heebo';font-size:.8rem;font-weight:400;color:var(--ink-soft);text-decoration:underline;cursor:pointer;margin-top:8px;padding:0}
+
+  .section{margin-top:34px}
+  .section h2{font-size:1.05rem;font-weight:900;letter-spacing:-.32px;margin-bottom:14px}
+
+  .chart-card{background:var(--white);border-radius:16px;padding:20px 16px 12px;box-shadow:0 4px 16px rgba(26,26,26,.06)}
+  .bars{display:flex;align-items:flex-end;gap:3px;height:130px}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .bar{width:100%;border-radius:4px 4px 0 0;min-height:3px;transition:height .4s}
+  .bar.now{outline:2px solid var(--dark);outline-offset:1px}
+  .bar-hour{font-size:.62rem;font-weight:400;color:var(--ink-soft);margin-top:5px}
+  .chart-legend{display:flex;gap:12px;justify-content:center;margin-top:12px;padding-bottom:6px;flex-wrap:wrap}
+  .chart-legend span{font-size:.72rem;font-weight:400;color:var(--ink-soft);display:flex;align-items:center;gap:4px}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+  .window-card{background:var(--white);border-radius:16px;border-right:5px solid var(--accent);box-shadow:0 4px 16px rgba(26,26,26,.06);padding:18px 20px;margin-top:14px}
+  .window-card .w-title{font-size:1rem;font-weight:700;letter-spacing:-.16px}
+  .window-card .w-body{font-weight:300;font-size:.93rem;line-height:1.55;color:var(--ink-soft);margin-top:4px}
+
+  .tips{background:var(--blush);border-radius:22px;padding:22px;margin-top:16px}
+  .tips p{font-weight:300;font-size:.93rem;line-height:1.55;margin-bottom:10px}
+  .tips p:last-child{margin-bottom:0}
+  .tips b{font-weight:700}
+
+  .footer-link{text-align:center;margin-top:36px;font-size:.88rem;font-weight:400}
+  .footer-link a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px}
+
+  .loading{text-align:center;padding:40px 20px;font-weight:300;color:var(--ink-soft)}
+  .loc-line{text-align:center;font-size:.78rem;font-weight:400;color:var(--ink-soft);margin-top:12px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-label">ריקי יודעת 🐆 כלי מס' 7</div>
+  <h1>ריקי<br><span class="accent-box">תחדשי לי</span></h1>
+  <p class="subtitle">מתי באמת צריך לחדש קרם הגנה - לפי השמש, לא לפי תחושת אשמה. ריקי בודקת את ה-UV במקומכן.</p>
+
+  <div class="loading" id="loading">ריקי בודקת מה השמש עושה עכשיו...</div>
+
+  <div id="app" class="hidden">
+    <div class="verdict" id="verdict">
+      <span class="leopard">🐆</span>
+      <div class="uv-label">UV עכשיו</div>
+      <div class="uv-big" id="uvNow">-</div>
+      <div class="verdict-text" id="verdictText"></div>
+      <div class="verdict-sub" id="verdictSub"></div>
+      <button class="btn-primary" id="appliedBtn">מרחתי עכשיו ✓</button>
+    </div>
+
+    <div class="notify-card" id="notifyCard">
+      <div class="n-title" id="nTitle">רוצה שריקי תזכיר לך לבד?</div>
+      <div class="n-body" id="nBody">בלי לפתוח כלום - כשה-UV גבוה ועברו שעתיים, קופצת הודעה. כשהשמש נחה, גם ריקי נחה.</div>
+      <div class="ios-steps" id="iosSteps">
+        באייפון זה עובד רק מהמסך הראשי, אז שני צעדים קטנים:<br>
+        1. למטה בדפדפן: <b>שיתוף</b> (הריבוע עם החץ) ← <b>הוסף למסך הבית</b><br>
+        2. לפתוח את ריקי מהאייקון החדש וללחוץ שוב על הכפתור כאן 🐆
+      </div>
+      <button class="btn-primary" id="notifyBtn">הפעילי לי תזכורות 🔔</button>
+    </div>
+
+    <div class="timer-panel" id="timerPanel">
+      <div class="t-label">החידוש הבא</div>
+      <div class="t-time" id="timerTime">--:--</div>
+      <div class="t-note" id="timerNote"></div>
+      <button class="btn-neutral" id="resetBtn">איפוס</button>
+    </div>
+
+    <div class="meter-card" id="meterCard">
+      <div class="m-title">כמה נשאר לך בבקבוק 🧴</div>
+      <div class="meter-bar"><div class="meter-fill" id="meterFill"></div></div>
+      <div class="m-body" id="meterBody"></div>
+      <div class="m-link">שלא תיתפסי בלי - <a href="#" id="affLink" target="_blank" rel="noopener">הקרמים שריקי מורחת בעצמה ←</a></div>
+      <button class="m-reset" id="newBottleBtn">התחלתי בקבוק חדש</button>
+    </div>
+
+    <div class="section">
+      <h2>השמש היום, שעה-שעה</h2>
+      <div class="chart-card">
+        <div class="bars" id="bars"></div>
+        <div class="chart-legend">
+          <span><i class="dot" style="background:var(--uv-low)"></i>נמוך (0-2)</span>
+          <span><i class="dot" style="background:var(--uv-mid)"></i>בינוני (3-5)</span>
+          <span><i class="dot" style="background:var(--uv-high)"></i>גבוה (6-7)</span>
+          <span><i class="dot" style="background:var(--uv-vhigh)"></i>מסוכן (8+)</span>
+        </div>
+      </div>
+      <div class="window-card">
+        <div class="w-title" id="windowTitle">חלון ההגנה של היום</div>
+        <div class="w-body" id="windowBody"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>ריקי מזכירה</h2>
+      <div class="tips">
+        <p><b>הכלל:</b> UV מ-3 ומעלה = מורחים. מתחת ל-3 העור שלכן בהפסקת צהריים.</p>
+        <p><b>הכמות:</b> שתי אצבעות לפנים. לא "קצת על הלחיים", שתי אצבעות. ריקי סופרת.</p>
+        <p><b>בפנים כל היום?</b> ליד חלון גדול UVA עדיין עובר. מריחה אחת בבוקר מספיקה.</p>
+      </div>
+    </div>
+
+    <div class="footer-link"><a href="#" id="footerAffLink" target="_blank" rel="noopener">הקרמים שריקי מורחת בעצמה ←</a></div>
+    <div class="loc-line" id="locLine"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ====== הגדרות - לעדכן לפני העלאה ======
+  const VAPID_PUBLIC_KEY = 'BEmSA3IuAuxdy3tb9crMBLBRWKUo1DsG_rbsGrC-p-yG-u2ipDzQvx0UW65rzcA_wx1VOqTHi2dAlky_v_DAvWs';
+  const AFFILIATE_URL = 'https://rikiknows.co.il/'; // לינק לעמוד הקרמים עם קודי האפיליאציה
+  const APPLICATIONS_PER_BOTTLE = 30; // בערך בקבוק 50 מ"ל בשתי אצבעות לפנים+צוואר
+  // ========================================
+
+  const FALLBACK = {lat:31.97, lon:34.79, name:'ראשון לציון (ברירת מחדל)'};
+  const UV_THRESHOLD = 3;
+  const REAPPLY_MS = 2*60*60*1000;
+  let hourly = [], uvNow = 0, timerInterval = null, appliedAt = null, userLoc = FALLBACK;
+
+  // אחסון בטוח - נופל לזיכרון אם localStorage חסום (למשל בתצוגה מקדימה)
+  const mem = {};
+  const store = {
+    get(k){ try{ return localStorage.getItem(k); }catch(e){ return mem[k] ?? null; } },
+    set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } }
+  };
+
+  document.getElementById('affLink').href = AFFILIATE_URL;
+  document.getElementById('footerAffLink').href = AFFILIATE_URL;
+
+  function uvColor(uv){
+    if(uv < 3) return 'var(--uv-low)';
+    if(uv < 6) return 'var(--uv-mid)';
+    if(uv < 8) return 'var(--uv-high)';
+    return 'var(--uv-vhigh)';
+  }
+
+  function getLocation(){
+    return new Promise(resolve => {
+      if(!navigator.geolocation){ resolve(FALLBACK); return; }
+      navigator.geolocation.getCurrentPosition(
+        p => resolve({lat:p.coords.latitude, lon:p.coords.longitude, name:'המיקום הנוכחי שלכן'}),
+        () => resolve(FALLBACK),
+        {timeout:6000}
+      );
+    });
+  }
+
+  async function fetchUV(loc){
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&hourly=uv_index&current=uv_index&timezone=auto&forecast_days=1`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('api');
+    return res.json();
+  }
+
+  function render(data, loc){
+    const nowHour = new Date().getHours();
+    uvNow = Math.round((data.current?.uv_index ?? 0)*10)/10;
+    hourly = data.hourly.time.map((t,i)=>({hour:new Date(t).getHours(), uv:data.hourly.uv_index[i]}));
+
+    document.getElementById('uvNow').textContent = uvNow;
+    const vt = document.getElementById('verdictText');
+    const vs = document.getElementById('verdictSub');
+    const btn = document.getElementById('appliedBtn');
+    if(uvNow >= 8){
+      vt.textContent = 'ריקי אומרת: למרוח. עכשיו. בלי דיונים.';
+      vs.textContent = 'רמה מסוכנת - ולחדש כל שעתיים כל עוד השמש ככה.';
+      btn.classList.remove('hidden');
+    } else if(uvNow >= 6){
+      vt.textContent = 'שמש רצינית. מורחות ומחדשות כל שעתיים.';
+      vs.textContent = 'וכובע לא יזיק, רק אומרת.';
+      btn.classList.remove('hidden');
+    } else if(uvNow >= UV_THRESHOLD){
+      vt.textContent = 'UV בינוני - עדיין מורחים.';
+      vs.textContent = 'בינוני זה לא "בסדר", בינוני זה קמטים בתשלומים.';
+      btn.classList.remove('hidden');
+    } else {
+      vt.textContent = 'השמש בהפסקה. אפשר לנשום.';
+      vs.textContent = 'לא צריך לחדש עכשיו - ריקי תגיד מתי כן.';
+      btn.classList.add('hidden');
+    }
+
+    const barsEl = document.getElementById('bars');
+    barsEl.innerHTML = '';
+    const maxUv = Math.max(...hourly.map(h=>h.uv), 8);
+    hourly.filter(h=>h.hour>=5 && h.hour<=20).forEach(h=>{
+      const col = document.createElement('div'); col.className='bar-col';
+      const bar = document.createElement('div'); bar.className='bar'+(h.hour===nowHour?' now':'');
+      bar.style.height = Math.max(3,(h.uv/maxUv)*100)+'%';
+      bar.style.background = uvColor(h.uv);
+      const lbl = document.createElement('div'); lbl.className='bar-hour'; lbl.textContent = h.hour;
+      col.appendChild(bar); col.appendChild(lbl); barsEl.appendChild(col);
+    });
+
+    const over = hourly.filter(h=>h.uv>=UV_THRESHOLD).map(h=>h.hour);
+    const wb = document.getElementById('windowBody');
+    if(over.length){
+      const from = String(Math.min(...over)).padStart(2,'0');
+      const to = String(Math.max(...over)+1).padStart(2,'0');
+      wb.textContent = `היום צריך הגנה בין ${from}:00 ל-${to}:00. לפני ואחרי - השמש לא במשמרת, וריקי לא מציקה סתם.`;
+    } else {
+      wb.textContent = 'היום ה-UV נמוך לאורך כל היום. יום נדיר. תיהנו ממנו.';
+    }
+
+    document.getElementById('locLine').textContent = '☀️ נתוני UV לפי ' + loc.name + ' · מקור: Open-Meteo';
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+  }
+
+  // ====== טיימר ======
+  function nextUvBelowThresholdAfter(dateMs){
+    const h = new Date(dateMs).getHours();
+    const rec = hourly.find(x=>x.hour===h);
+    return rec ? rec.uv < UV_THRESHOLD : true;
+  }
+
+  function startTimer(){
+    appliedAt = Date.now();
+    document.getElementById('timerPanel').classList.add('show');
+    tick();
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(tick, 1000);
+    logApplication();
+  }
+
+  function tick(){
+    const target = appliedAt + REAPPLY_MS;
+    const left = target - Date.now();
+    const tTime = document.getElementById('timerTime');
+    const tNote = document.getElementById('timerNote');
+    if(left <= 0){
+      tTime.textContent = '00:00';
+      tNote.textContent = uvNow >= UV_THRESHOLD ? 'הגיע הזמן! ריקי מחכה שתמרחו שוב.' : 'עברו שעתיים אבל ה-UV כבר נמוך - אתן משוחררות עד מחר.';
+      clearInterval(timerInterval);
+      return;
+    }
+    const m = Math.floor(left/60000), s = Math.floor((left%60000)/1000);
+    tTime.textContent = String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+    tNote.textContent = nextUvBelowThresholdAfter(appliedAt + REAPPLY_MS)
+      ? 'עד אז השמש כבר תסיים משמרת - אז זו כנראה המריחה האחרונה להיום 🎉'
+      : 'כשהטיימר מגיע לאפס - מחדשות. שתי אצבעות, כן?';
+  }
+
+  // ====== מד "כמה נשאר" ======
+  function logApplication(){
+    const n = (parseInt(store.get('riki_applications')||'0',10)) + 1;
+    store.set('riki_applications', String(n));
+    renderMeter();
+  }
+
+  function renderMeter(){
+    const n = parseInt(store.get('riki_applications')||'0',10);
+    const card = document.getElementById('meterCard');
+    if(n < 3){ card.classList.remove('show'); return; } // מופיע רק אחרי כמה מריחות
+    card.classList.add('show');
+    const left = Math.max(0, APPLICATIONS_PER_BOTTLE - n);
+    const pct = Math.max(4, Math.round((left/APPLICATIONS_PER_BOTTLE)*100));
+    document.getElementById('meterFill').style.width = pct + '%';
+    const body = document.getElementById('meterBody');
+    if(left === 0){
+      body.textContent = 'לפי הספירה של ריקי - הבקבוק גמור. מקווה שיש גיבוי במגירה.';
+      card.classList.add('low');
+    } else if(left <= 6){
+      body.textContent = `לפי הספירה של ריקי, נשארו לך בערך ${left} מריחות - זה פחות משבוע של קיץ.`;
+      card.classList.add('low');
+    } else {
+      body.textContent = `ספרתי ${n} מריחות עד עכשיו - נשארו בערך ${left} בבקבוק (בהנחה של 50 מ"ל ושתי אצבעות אמיתיות).`;
+      card.classList.remove('low');
+    }
+  }
+
+  document.getElementById('newBottleBtn').addEventListener('click', ()=>{
+    store.set('riki_applications','0');
+    document.getElementById('meterCard').classList.remove('show','low');
+  });
+
+  // ====== התראות פוש ======
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+
+  function urlBase64ToUint8Array(base64String){
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    return Uint8Array.from([...rawData].map(c=>c.charCodeAt(0)));
+  }
+
+  async function setupNotifications(){
+    const card = document.getElementById('notifyCard');
+    const title = document.getElementById('nTitle');
+    const body = document.getElementById('nBody');
+    const btn = document.getElementById('notifyBtn');
+
+    if(isIOS && !isStandalone){
+      document.getElementById('iosSteps').style.display = 'block';
+      btn.textContent = 'קודם מוסיפים למסך הבית 👆';
+      btn.disabled = true;
+      return;
+    }
+    if(!('serviceWorker' in navigator) || !('PushManager' in window)){
+      card.style.display = 'none';
+      return;
+    }
+    if(store.get('riki_push') === 'on' && Notification.permission === 'granted'){
+      markSubscribed();
+      return;
+    }
+    btn.addEventListener('click', subscribe);
+
+    async function subscribe(){
+      try{
+        btn.disabled = true; btn.textContent = 'רגע, מסדרת...';
+        const reg = await navigator.serviceWorker.ready;
+        const perm = await Notification.requestPermission();
+        if(perm !== 'granted'){
+          btn.disabled = false; btn.textContent = 'הפעילי לי תזכורות 🔔';
+          body.textContent = 'בלי אישור התראות ריקי לא יכולה להזכיר. אפשר לשנות בהגדרות הדפדפן.';
+          return;
+        }
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+        const res = await fetch('/.netlify/functions/subscribe', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({subscription: sub, lat: userLoc.lat, lon: userLoc.lon})
+        });
+        if(!res.ok) throw new Error('server');
+        store.set('riki_push','on');
+        markSubscribed();
+      }catch(e){
+        btn.disabled = false; btn.textContent = 'הפעילי לי תזכורות 🔔';
+        body.textContent = 'משהו השתבש בהרשמה. שווה לנסות שוב עוד רגע.';
+      }
+    }
+
+    function markSubscribed(){
+      card.classList.add('on');
+      title.textContent = 'ריקי על המשמרת ✓';
+      body.textContent = 'כשה-UV יעלה ויעברו שעתיים - תקבלי הודעה. כשהשמש תלך הביתה, ריקי תשתוק. מבטיחה.';
+      btn.style.display = 'none';
+    }
+  }
+
+  document.getElementById('appliedBtn').addEventListener('click', startTimer);
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    clearInterval(timerInterval);
+    document.getElementById('timerPanel').classList.remove('show');
+  });
+
+  (async function init(){
+    if('serviceWorker' in navigator){
+      try{ navigator.serviceWorker.register('sw.js'); }catch(e){}
+    }
+    try{
+      userLoc = await getLocation();
+      const data = await fetchUV(userLoc);
+      render(data, userLoc);
+    }catch(e){
+      // מצב דמו - כשה-API חסום (למשל בתצוגה מקדימה)
+      const demoUv = {5:0,6:0.3,7:1.2,8:2.8,9:4.5,10:6.5,11:8.2,12:9.5,13:9.8,14:9,15:7.2,16:5,17:3.2,18:1.5,19:0.4,20:0};
+      const nowH = new Date().getHours();
+      const times = [], uvs = [];
+      for(let h=0; h<24; h++){
+        times.push(new Date(new Date().setHours(h,0,0,0)).toISOString());
+        uvs.push(demoUv[h] ?? 0);
+      }
+      render({current:{uv_index: demoUv[nowH] ?? 0}, hourly:{time:times, uv_index:uvs}},
+             {name:'מצב דמו - נתונים לדוגמה (יעבוד באמת אחרי העלאה לנטליפיי)'});
+    }
+    renderMeter();
+    setupNotifications();
+  })();
+})();
+</script>
+</body>
+</html>
