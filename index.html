@@ -82,8 +82,10 @@
   .tips p:last-child{margin-bottom:0}
   .tips b{font-weight:700}
 
-  .footer-link{text-align:center;margin-top:36px;font-size:.88rem;font-weight:400}
-  .footer-link a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px}
+  .cream-card{background:var(--accent);border-radius:22px;padding:22px;margin-top:16px;text-align:center;box-shadow:0 4px 16px rgba(26,26,26,.06)}
+  .cream-card .c-title{font-size:1.05rem;font-weight:900;letter-spacing:-.32px}
+  .cream-card .c-body{font-weight:300;font-size:.9rem;line-height:1.55;margin-top:4px}
+  .cream-card a.btn-primary{display:block;text-decoration:none;text-align:center;margin-top:14px}
 
   .loading{text-align:center;padding:40px 20px;font-weight:300;color:var(--ink-soft)}
   .loc-line{text-align:center;font-size:.78rem;font-weight:400;color:var(--ink-soft);margin-top:12px}
@@ -146,7 +148,7 @@
         </div>
       </div>
       <div class="window-card">
-        <div class="w-title" id="windowTitle">חלון ההגנה של היום</div>
+        <div class="w-title" id="windowTitle">חלון החידושים של היום</div>
         <div class="w-body" id="windowBody"></div>
       </div>
     </div>
@@ -154,13 +156,18 @@
     <div class="section">
       <h2>ריקי מזכירה</h2>
       <div class="tips">
-        <p><b>הכלל:</b> UV מ-3 ומעלה = מורחים. מתחת ל-3 העור שלכן בהפסקת צהריים.</p>
+        <p><b>מריחת בוקר:</b> תמיד, בלי לבדוק כלום. הכלי אומר מתי לחדש - לא אם למרוח.</p>
+        <p><b>הכלל לחידושים:</b> UV מ-3 ומעלה = מחדשות כל שעתיים. מתחת לזה - השכבה של הבוקר מחזיקה.</p>
         <p><b>הכמות:</b> שתי אצבעות לפנים. לא "קצת על הלחיים", שתי אצבעות. ריקי סופרת.</p>
         <p><b>בפנים כל היום?</b> ליד חלון גדול UVA עדיין עובר. מריחה אחת בבוקר מספיקה.</p>
       </div>
     </div>
 
-    <div class="footer-link"><a href="#" id="footerAffLink" target="_blank" rel="noopener">הקרמים שריקי מורחת בעצמה ←</a></div>
+    <div class="cream-card">
+      <div class="c-title">מה למרוח? ריקי כבר בדקה 🐆</div>
+      <div class="c-body">כל קרמי ההגנה שריקי מורחת בעצמה - עם ההסברים והקודים.</div>
+      <a href="#" id="footerAffLink" target="_blank" rel="noopener" class="btn-primary">לקרמים של ריקי ←</a>
+    </div>
     <div class="loc-line" id="locLine"></div>
   </div>
 </div>
@@ -169,7 +176,7 @@
 (function(){
   // ====== הגדרות - לעדכן לפני העלאה ======
   const VAPID_PUBLIC_KEY = 'BEmSA3IuAuxdy3tb9crMBLBRWKUo1DsG_rbsGrC-p-yG-u2ipDzQvx0UW65rzcA_wx1VOqTHi2dAlky_v_DAvWs';
-  const AFFILIATE_URL = 'https://rikiknows.co.il/'; // לינק לעמוד הקרמים עם קודי האפיליאציה
+  const AFFILIATE_URL = 'https://www.rikiknows.co.il/beauty'; // עמוד הקרמים עם קודי האפיליאציה
   const APPLICATIONS_PER_BOTTLE = 30; // בערך בקבוק 50 מ"ל בשתי אצבעות לפנים+צוואר
   // ========================================
 
@@ -257,7 +264,7 @@
     if(over.length){
       const from = String(Math.min(...over)).padStart(2,'0');
       const to = String(Math.max(...over)+1).padStart(2,'0');
-      wb.textContent = `היום צריך הגנה בין ${from}:00 ל-${to}:00. לפני ואחרי - השמש לא במשמרת, וריקי לא מציקה סתם.`;
+      wb.textContent = `מריחת בוקר - תמיד, לפני שיוצאים. חידושים צריך היום בין ${from}:00 ל-${to}:00 - אחרי ${to}:00 ריקי משחררת.`;
     } else {
       wb.textContent = 'היום ה-UV נמוך לאורך כל היום. יום נדיר. תיהנו ממנו.';
     }
@@ -363,6 +370,7 @@
     }
     if(store.get('riki_push') === 'on' && Notification.permission === 'granted'){
       markSubscribed();
+      refreshLocation(); // עדכון שקט של המיקום בשרת - שהתזכורות יתאימו גם בנסיעות
       return;
     }
     btn.addEventListener('click', subscribe);
@@ -393,6 +401,19 @@
         btn.disabled = false; btn.textContent = 'הפעילי לי תזכורות 🔔';
         body.textContent = 'משהו השתבש בהרשמה. שווה לנסות שוב עוד רגע.';
       }
+    }
+
+    async function refreshLocation(){
+      try{
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if(!sub) return;
+        await fetch('/.netlify/functions/subscribe', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({subscription: sub, lat: userLoc.lat, lon: userLoc.lon})
+        });
+      }catch(e){ /* עדכון רקע - נכשל בשקט */ }
     }
 
     function markSubscribed(){
