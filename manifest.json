@@ -1,6 +1,6 @@
 {
   "name": "ריקי תחדשי לי",
-  "short_name": "תחדשי לי",
+  "short_name": "ריקי תחדשי לי",
   "description": "תזכורות קרם הגנה לפי UV אמיתי - מבית ריקי יודעת",
   "dir": "rtl",
   "lang": "he",
@@ -9,7 +9,15 @@
   "background_color": "#FBF8F4",
   "theme_color": "#FBF8F4",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }
