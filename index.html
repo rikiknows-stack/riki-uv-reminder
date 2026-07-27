@@ -24,7 +24,6 @@
   .subtitle{font-weight:300;font-size:.95rem;color:var(--ink-soft);text-align:center;margin:14px auto 26px;max-width:38ch;line-height:1.55}
 
   .verdict{background:var(--accent);border-radius:22px;padding:24px 22px;text-align:center;font-weight:700;box-shadow:0 4px 16px rgba(26,26,26,.06);position:relative;overflow:hidden}
-  .verdict .leopard{position:absolute;left:14px;bottom:8px;font-size:2.4rem;opacity:.14;pointer-events:none}
   .verdict .uv-big{font-size:3.2rem;font-weight:900;letter-spacing:-.02em;line-height:1}
   .verdict .uv-label{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
   .verdict .verdict-text{font-size:1.05rem;font-weight:700;letter-spacing:-.32px;margin-top:10px}
@@ -34,6 +33,11 @@
   .btn-primary:active{opacity:.85}
   .btn-primary:disabled{opacity:.5;cursor:default}
   .btn-neutral{background:var(--light);color:var(--dark);border:none;border-radius:10px;padding:11px 20px;font-family:'Heebo';font-weight:700;font-size:.88rem;cursor:pointer;margin-top:10px;width:100%}
+
+  .install-card{background:var(--white);border-radius:16px;border-right:5px solid var(--pink);box-shadow:0 4px 16px rgba(26,26,26,.06);padding:18px 20px;margin-top:16px;display:none}
+  .install-card.show{display:block}
+  .install-card .i-title{font-size:1rem;font-weight:700;letter-spacing:-.16px}
+  .install-card .i-body{font-weight:300;font-size:.93rem;line-height:1.55;color:var(--ink-soft);margin-top:4px}
 
   .notify-card{background:var(--white);border-radius:16px;border-right:5px solid var(--accent);box-shadow:0 4px 16px rgba(26,26,26,.06);padding:18px 20px;margin-top:16px}
   .notify-card .n-title{font-size:1rem;font-weight:700;letter-spacing:-.16px}
@@ -94,7 +98,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="top-label">ריקי יודעת 🐆 כלי מס' 7</div>
+  <div class="top-label">ריקי יודעת</div>
   <h1>ריקי<br><span class="accent-box">תחדשי לי</span></h1>
   <p class="subtitle">מתי באמת צריך לחדש קרם הגנה - לפי השמש, לא לפי תחושת אשמה. ריקי בודקת את ה-UV במקומכן.</p>
 
@@ -102,12 +106,17 @@
 
   <div id="app" class="hidden">
     <div class="verdict" id="verdict">
-      <span class="leopard">🐆</span>
-      <div class="uv-label">UV עכשיו</div>
+            <div class="uv-label">UV עכשיו</div>
       <div class="uv-big" id="uvNow">-</div>
       <div class="verdict-text" id="verdictText"></div>
       <div class="verdict-sub" id="verdictSub"></div>
       <button class="btn-primary" id="appliedBtn">מרחתי עכשיו ✓</button>
+    </div>
+
+    <div class="install-card" id="installCard">
+      <div class="i-title">רוצה את ריקי על מסך הבית?</div>
+      <div class="i-body" id="installBody">אייקון אחד, בלי חנות אפליקציות - וההתראות עובדות הכי טוב ככה.</div>
+      <button class="btn-primary" id="installBtn">שמרי אותי כאפליקציה</button>
     </div>
 
     <div class="notify-card" id="notifyCard">
@@ -116,7 +125,7 @@
       <div class="ios-steps" id="iosSteps">
         באייפון זה עובד רק מהמסך הראשי, אז שני צעדים קטנים:<br>
         1. למטה בדפדפן: <b>שיתוף</b> (הריבוע עם החץ) ← <b>הוסף למסך הבית</b><br>
-        2. לפתוח את ריקי מהאייקון החדש וללחוץ שוב על הכפתור כאן 🐆
+        2. לפתוח את ריקי מהאייקון החדש וללחוץ שוב על הכפתור כאן
       </div>
       <button class="btn-primary" id="notifyBtn">הפעילי לי תזכורות 🔔</button>
     </div>
@@ -129,7 +138,7 @@
     </div>
 
     <div class="meter-card" id="meterCard">
-      <div class="m-title">כמה נשאר לך בבקבוק 🧴</div>
+      <div class="m-title">כמה נשאר לך בבקבוק</div>
       <div class="meter-bar"><div class="meter-fill" id="meterFill"></div></div>
       <div class="m-body" id="meterBody"></div>
       <div class="m-link">שלא תיתפסי בלי - <a href="#" id="affLink" target="_blank" rel="noopener">הקרמים שריקי מורחת בעצמה ←</a></div>
@@ -164,7 +173,7 @@
     </div>
 
     <div class="cream-card">
-      <div class="c-title">מה למרוח? ריקי כבר בדקה 🐆</div>
+      <div class="c-title">מה למרוח? ריקי כבר בדקה</div>
       <div class="c-body">כל קרמי ההגנה שריקי מורחת בעצמה - עם ההסברים והקודים.</div>
       <a href="#" id="footerAffLink" target="_blank" rel="noopener" class="btn-primary">לקרמים של ריקי ←</a>
     </div>
@@ -341,6 +350,40 @@
     document.getElementById('meterCard').classList.remove('show','low');
   });
 
+  // ====== באנר התקנה כאפליקציה ======
+  let deferredInstall = null;
+  function setupInstallBanner(){
+    const card = document.getElementById('installCard');
+    const btn = document.getElementById('installBtn');
+    const body = document.getElementById('installBody');
+    if(isStandalone) return; // כבר אפליקציה - אין צורך
+
+    if(isIOS){
+      card.classList.add('show');
+      btn.style.display = 'none';
+      body.innerHTML = 'באייפון: למטה בדפדפן - <b>שיתוף</b> (הריבוע עם החץ) ← <b>הוסף למסך הבית</b>. ככה גם ההתראות יעבדו.';
+      return;
+    }
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredInstall = e;
+      card.classList.add('show');
+    });
+
+    btn.addEventListener('click', async () => {
+      if(!deferredInstall) return;
+      deferredInstall.prompt();
+      const choice = await deferredInstall.userChoice;
+      if(choice.outcome === 'accepted'){
+        card.classList.remove('show');
+      }
+      deferredInstall = null;
+    });
+
+    window.addEventListener('appinstalled', () => card.classList.remove('show'));
+  }
+
   // ====== התראות פוש ======
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -359,8 +402,7 @@
     const btn = document.getElementById('notifyBtn');
 
     if(isIOS && !isStandalone){
-      document.getElementById('iosSteps').style.display = 'block';
-      btn.textContent = 'קודם מוסיפים למסך הבית 👆';
+      btn.textContent = 'קודם שומרים כאפליקציה 👆';
       btn.disabled = true;
       return;
     }
@@ -451,6 +493,7 @@
              {name:'מצב דמו - נתונים לדוגמה (יעבוד באמת אחרי העלאה לנטליפיי)'});
     }
     renderMeter();
+    setupInstallBanner();
     setupNotifications();
   })();
 })();
