@@ -46,11 +46,12 @@
   .ios-steps{background:var(--blush);border-radius:12px;padding:14px 16px;margin-top:12px;font-weight:300;font-size:.9rem;line-height:1.7;display:none}
   .ios-steps b{font-weight:700}
 
-  .timer-panel{background:var(--blush);border-radius:22px;padding:22px;margin-top:16px;text-align:center;display:none}
-  .timer-panel.show{display:block}
-  .timer-panel .t-label{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
-  .timer-panel .t-time{font-size:2.2rem;font-weight:900;letter-spacing:-.02em;margin:6px 0}
-  .timer-panel .t-note{font-weight:300;font-size:.88rem;color:var(--ink-soft);line-height:1.55}
+  .timer-inline{background:var(--dark);color:var(--white);border-radius:10px;padding:12px 24px;margin-top:16px;display:none}
+  .timer-inline.show{display:block}
+  .timer-inline .t-label{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+  .timer-inline .t-time{font-size:1.7rem;font-weight:900;letter-spacing:-.02em;margin:2px 0}
+  .timer-inline .t-note{font-weight:300;font-size:.85rem;line-height:1.5;opacity:.85}
+  .t-reset{background:none;border:none;font-family:'Heebo';font-size:.78rem;font-weight:400;color:var(--white);opacity:.6;text-decoration:underline;cursor:pointer;margin-top:6px;padding:0}
 
 
   .section{margin-top:34px}
@@ -100,6 +101,12 @@
       <div class="verdict-text" id="verdictText"></div>
       <div class="verdict-sub" id="verdictSub"></div>
       <button class="btn-primary" id="appliedBtn">מרחתי עכשיו ✓</button>
+      <div class="timer-inline" id="timerPanel">
+        <div class="t-label">החידוש הבא בעוד</div>
+        <div class="t-time" id="timerTime">--:--</div>
+        <div class="t-note" id="timerNote"></div>
+        <button class="t-reset" id="resetBtn">טעות? איפוס</button>
+      </div>
     </div>
 
     <div class="install-card" id="installCard">
@@ -119,12 +126,6 @@
       <button class="btn-primary" id="notifyBtn">הפעילי לי תזכורות 🔔</button>
     </div>
 
-    <div class="timer-panel" id="timerPanel">
-      <div class="t-label">החידוש הבא</div>
-      <div class="t-time" id="timerTime">--:--</div>
-      <div class="t-note" id="timerNote"></div>
-      <button class="btn-neutral" id="resetBtn">איפוס</button>
-    </div>
 
 
     <div class="section">
@@ -270,10 +271,19 @@
     return rec ? rec.uv < UV_THRESHOLD : true;
   }
 
+  function showTimerUI(){
+    document.getElementById('timerPanel').classList.add('show');
+    document.getElementById('appliedBtn').classList.add('hidden');
+  }
+  function hideTimerUI(){
+    document.getElementById('timerPanel').classList.remove('show');
+    if(uvNow >= UV_THRESHOLD) document.getElementById('appliedBtn').classList.remove('hidden');
+  }
+
   function startTimer(){
     appliedAt = Date.now();
     store.set('riki_applied_at', String(appliedAt));
-    document.getElementById('timerPanel').classList.add('show');
+    showTimerUI();
     tick();
     if(timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(tick, 1000);
@@ -285,7 +295,7 @@
     if(!saved) return;
     if(Date.now() - saved >= REAPPLY_MS) return; // הטיימר כבר הסתיים - אין מה לשחזר
     appliedAt = saved;
-    document.getElementById('timerPanel').classList.add('show');
+    showTimerUI();
     tick();
     if(timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(tick, 1000);
@@ -297,9 +307,9 @@
     const tTime = document.getElementById('timerTime');
     const tNote = document.getElementById('timerNote');
     if(left <= 0){
-      tTime.textContent = '00:00';
-      tNote.textContent = uvNow >= UV_THRESHOLD ? 'הגיע הזמן! ריקי מחכה שתמרחו שוב.' : 'עברו שעתיים אבל ה-UV כבר נמוך - אתן משוחררות עד מחר.';
       clearInterval(timerInterval);
+      store.set('riki_applied_at','0');
+      hideTimerUI();
       return;
     }
     const m = Math.floor(left/60000), s = Math.floor((left%60000)/1000);
@@ -430,7 +440,7 @@
   document.getElementById('resetBtn').addEventListener('click', ()=>{
     clearInterval(timerInterval);
     store.set('riki_applied_at','0');
-    document.getElementById('timerPanel').classList.remove('show');
+    hideTimerUI();
   });
 
   (async function init(){
