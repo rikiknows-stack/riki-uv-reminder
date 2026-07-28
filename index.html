@@ -292,11 +292,24 @@
 
   function startTimer(){
     appliedAt = Date.now();
+    store.set('riki_applied_at', String(appliedAt));
     document.getElementById('timerPanel').classList.add('show');
     tick();
     if(timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(tick, 1000);
     logApplication();
+  }
+
+  // שחזור טיימר פעיל אחרי סגירה ופתיחה מחדש
+  function resumeTimer(){
+    const saved = parseInt(store.get('riki_applied_at')||'0',10);
+    if(!saved) return;
+    if(Date.now() - saved >= REAPPLY_MS) return; // הטיימר כבר הסתיים - אין מה לשחזר
+    appliedAt = saved;
+    document.getElementById('timerPanel').classList.add('show');
+    tick();
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(tick, 1000);
   }
 
   function tick(){
@@ -469,6 +482,7 @@
   document.getElementById('appliedBtn').addEventListener('click', startTimer);
   document.getElementById('resetBtn').addEventListener('click', ()=>{
     clearInterval(timerInterval);
+    store.set('riki_applied_at','0');
     document.getElementById('timerPanel').classList.remove('show');
   });
 
@@ -493,6 +507,7 @@
              {name:'מצב דמו - נתונים לדוגמה (יעבוד באמת אחרי העלאה לנטליפיי)'});
     }
     renderMeter();
+    resumeTimer();
     setupInstallBanner();
     setupNotifications();
   })();
