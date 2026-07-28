@@ -52,17 +52,6 @@
   .timer-panel .t-time{font-size:2.2rem;font-weight:900;letter-spacing:-.02em;margin:6px 0}
   .timer-panel .t-note{font-weight:300;font-size:.88rem;color:var(--ink-soft);line-height:1.55}
 
-  .meter-card{background:var(--white);border-radius:16px;box-shadow:0 4px 16px rgba(26,26,26,.06);padding:18px 20px;margin-top:16px;display:none}
-  .meter-card.show{display:block}
-  .meter-card .m-title{font-size:1rem;font-weight:700;letter-spacing:-.16px}
-  .meter-bar{background:var(--light);border-radius:99px;height:12px;margin:12px 0 8px;overflow:hidden}
-  .meter-fill{background:var(--accent);height:100%;border-radius:99px;transition:width .4s}
-  .meter-card .m-body{font-weight:300;font-size:.9rem;color:var(--ink-soft);line-height:1.55}
-  .meter-card .m-link{display:none;margin-top:10px;font-size:.92rem;font-weight:700}
-  .meter-card .m-link a{color:var(--dark)}
-  .meter-card.low .m-link{display:block}
-  .meter-card.low .meter-fill{background:var(--uv-vhigh)}
-  .m-reset{background:none;border:none;font-family:'Heebo';font-size:.8rem;font-weight:400;color:var(--ink-soft);text-decoration:underline;cursor:pointer;margin-top:8px;padding:0}
 
   .section{margin-top:34px}
   .section h2{font-size:1.05rem;font-weight:900;letter-spacing:-.32px;margin-bottom:14px}
@@ -137,13 +126,6 @@
       <button class="btn-neutral" id="resetBtn">איפוס</button>
     </div>
 
-    <div class="meter-card" id="meterCard">
-      <div class="m-title">כמה נשאר לך בבקבוק</div>
-      <div class="meter-bar"><div class="meter-fill" id="meterFill"></div></div>
-      <div class="m-body" id="meterBody"></div>
-      <div class="m-link">שלא תיתפסי בלי - <a href="#" id="affLink" target="_blank" rel="noopener">הקרמים שריקי מורחת בעצמה ←</a></div>
-      <button class="m-reset" id="newBottleBtn">התחלתי בקבוק חדש</button>
-    </div>
 
     <div class="section">
       <h2>השמש היום, שעה-שעה</h2>
@@ -173,7 +155,7 @@
     </div>
 
     <div class="cream-card">
-      <div class="c-title">מה למרוח? ריקי כבר בדקה</div>
+      <div class="c-title">רוצה המלצה לקרם הגנה מעולה?</div>
       <div class="c-body">כל קרמי ההגנה שריקי מורחת בעצמה - עם ההסברים והקודים.</div>
       <a href="#" id="footerAffLink" target="_blank" rel="noopener" class="btn-primary">לקרמים של ריקי ←</a>
     </div>
@@ -186,7 +168,6 @@
   // ====== הגדרות - לעדכן לפני העלאה ======
   const VAPID_PUBLIC_KEY = 'BEmSA3IuAuxdy3tb9crMBLBRWKUo1DsG_rbsGrC-p-yG-u2ipDzQvx0UW65rzcA_wx1VOqTHi2dAlky_v_DAvWs';
   const AFFILIATE_URL = 'https://www.rikiknows.co.il/beauty'; // עמוד הקרמים עם קודי האפיליאציה
-  const APPLICATIONS_PER_BOTTLE = 30; // בערך בקבוק 50 מ"ל בשתי אצבעות לפנים+צוואר
   // ========================================
 
   const FALLBACK = {lat:31.97, lon:34.79, name:'ראשון לציון (ברירת מחדל)'};
@@ -201,7 +182,6 @@
     set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } }
   };
 
-  document.getElementById('affLink').href = AFFILIATE_URL;
   document.getElementById('footerAffLink').href = AFFILIATE_URL;
 
   function uvColor(uv){
@@ -297,7 +277,6 @@
     tick();
     if(timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(tick, 1000);
-    logApplication();
   }
 
   // שחזור טיימר פעיל אחרי סגירה ופתיחה מחדש
@@ -330,38 +309,6 @@
       : 'כשהטיימר מגיע לאפס - מחדשות. שתי אצבעות, כן?';
   }
 
-  // ====== מד "כמה נשאר" ======
-  function logApplication(){
-    const n = (parseInt(store.get('riki_applications')||'0',10)) + 1;
-    store.set('riki_applications', String(n));
-    renderMeter();
-  }
-
-  function renderMeter(){
-    const n = parseInt(store.get('riki_applications')||'0',10);
-    const card = document.getElementById('meterCard');
-    if(n < 3){ card.classList.remove('show'); return; } // מופיע רק אחרי כמה מריחות
-    card.classList.add('show');
-    const left = Math.max(0, APPLICATIONS_PER_BOTTLE - n);
-    const pct = Math.max(4, Math.round((left/APPLICATIONS_PER_BOTTLE)*100));
-    document.getElementById('meterFill').style.width = pct + '%';
-    const body = document.getElementById('meterBody');
-    if(left === 0){
-      body.textContent = 'לפי הספירה של ריקי - הבקבוק גמור. מקווה שיש גיבוי במגירה.';
-      card.classList.add('low');
-    } else if(left <= 6){
-      body.textContent = `לפי הספירה של ריקי, נשארו לך בערך ${left} מריחות - זה פחות משבוע של קיץ.`;
-      card.classList.add('low');
-    } else {
-      body.textContent = `ספרתי ${n} מריחות עד עכשיו - נשארו בערך ${left} בבקבוק (בהנחה של 50 מ"ל ושתי אצבעות אמיתיות).`;
-      card.classList.remove('low');
-    }
-  }
-
-  document.getElementById('newBottleBtn').addEventListener('click', ()=>{
-    store.set('riki_applications','0');
-    document.getElementById('meterCard').classList.remove('show','low');
-  });
 
   // ====== באנר התקנה כאפליקציה ======
   let deferredInstall = null;
@@ -506,7 +453,6 @@
       render({current:{uv_index: demoUv[nowH] ?? 0}, hourly:{time:times, uv_index:uvs}},
              {name:'מצב דמו - נתונים לדוגמה (יעבוד באמת אחרי העלאה לנטליפיי)'});
     }
-    renderMeter();
     resumeTimer();
     setupInstallBanner();
     setupNotifications();
