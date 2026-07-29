@@ -60,8 +60,9 @@ export default async () => {
     const uv = await getUV(rec.lat, rec.lon);
 
     let payload = null;
+    const lastAction = Math.max(rec.lastNotified || 0, rec.lastApplied || 0);
 
-    if (uv >= UV_THRESHOLD && now - (rec.lastNotified || 0) >= REAPPLY_MS) {
+    if (uv >= UV_THRESHOLD && now - lastAction >= REAPPLY_MS) {
       payload = {
         title: 'ריקי תחדשי לי 🐆',
         body: pick(SUN_MESSAGES).replace('{uv}', Math.round(uv * 10) / 10)
