@@ -287,6 +287,22 @@
     tick();
     if(timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(tick, 1000);
+    reportApplied(); // סנכרון לשרת - ההתראה הבאה תיספר מהמריחה הזו
+  }
+
+  // דיווח לשרת שמרחת - כדי ששעון ההתראות יתיישר עם השעון שלך
+  async function reportApplied(){
+    try{
+      if(!('serviceWorker' in navigator)) return;
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if(!sub) return; // לא רשומה להתראות - אין שעון שרת ליישר
+      await fetch('/.netlify/functions/applied', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({endpoint: sub.endpoint})
+      });
+    }catch(e){ /* דיווח רקע - נכשל בשקט, הטיימר המקומי ממשיך כרגיל */ }
   }
 
   // שחזור טיימר פעיל אחרי סגירה ופתיחה מחדש
