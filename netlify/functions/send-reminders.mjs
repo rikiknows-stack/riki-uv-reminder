@@ -34,7 +34,7 @@ export default async () => {
 
   const store = getStore('riki-subs');
   const { blobs } = await store.list();
-  if (!blobs.length) return new Response('No subscribers');
+  if (!blobs.length) { console.log('No subscribers'); return new Response('No subscribers'); }
 
   // קיבוץ מנויות לפי מיקום מעוגל - קריאת UV אחת לכל אזור
   const uvCache = {};
@@ -88,7 +88,9 @@ export default async () => {
     }
   }
 
-  return new Response(`Sent ${sent}, cleaned ${cleaned}, subscribers ${blobs.length}`);
+  const summary = `Sent ${sent}, cleaned ${cleaned}, subscribers ${blobs.length}`;
+  console.log(summary);
+  return new Response(summary);
 };
 
 export const config = { schedule: '*/5 * * * *' };
