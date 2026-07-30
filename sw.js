@@ -11,6 +11,7 @@ self.addEventListener('push', event => {
       badge: 'icons/icon-192.png',
       dir: 'rtl',
       lang: 'he',
+      vibrate: [200, 100, 200],
       tag: 'riki-uv',
       renotify: true,
       data: { url: '/' }

@@ -173,7 +173,7 @@
 
   const FALLBACK = {lat:31.97, lon:34.79, name:'ראשון לציון (ברירת מחדל)'};
   const UV_THRESHOLD = 3;
-  const REAPPLY_MS = 2*60*60*1000;
+  const REAPPLY_MS = 115*60*1000; // מיושר לשעון השרת - שעה ו-55 דק'
   let hourly = [], uvNow = 0, timerInterval = null, appliedAt = null, userLoc = FALLBACK;
 
   // אחסון בטוח - נופל לזיכרון אם localStorage חסום (למשל בתצוגה מקדימה)
@@ -272,6 +272,8 @@
   }
 
   function showTimerUI(){
+    document.querySelector('#timerPanel .t-label').textContent = 'החידוש הבא בעוד';
+    document.getElementById('resetBtn').classList.remove('hidden');
     document.getElementById('timerPanel').classList.add('show');
     document.getElementById('appliedBtn').classList.add('hidden');
   }
@@ -325,7 +327,16 @@
     if(left <= 0){
       clearInterval(timerInterval);
       store.set('riki_applied_at','0');
-      hideTimerUI();
+      document.querySelector('#timerPanel .t-label').textContent = '';
+      if(uvNow >= UV_THRESHOLD){
+        tTime.textContent = 'הגיע הזמן לחדש';
+        tNote.textContent = 'ריקי כבר שלחה תזכורת - שתי אצבעות ולוחצות שוב.';
+        document.getElementById('appliedBtn').classList.remove('hidden');
+      } else {
+        tTime.textContent = 'משוחררת עד מחר';
+        tNote.textContent = 'עברו שעתיים אבל השמש כבר ירדה - אין צורך לחדש.';
+      }
+      document.getElementById('resetBtn').classList.add('hidden');
       return;
     }
     const m = Math.floor(left/60000), s = Math.floor((left%60000)/1000);
