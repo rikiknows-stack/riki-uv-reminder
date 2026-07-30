@@ -2,7 +2,7 @@ import { getStore } from '@netlify/blobs';
 import webpush from 'web-push';
 
 const UV_THRESHOLD = 3;
-const REAPPLY_MS = 2 * 60 * 60 * 1000; // שעתיים
+const REAPPLY_MS = 115 * 60 * 1000; // שעה ו-55 דק' - ההתראה מגיעה בזמן או מעט לפני, אף פעם באיחור
 
 // המשפטים של ריקי - מתחלפים רנדומלית
 const SUN_MESSAGES = [
@@ -77,7 +77,7 @@ export default async () => {
     if (!payload) continue;
 
     try {
-      await webpush.sendNotification(rec.subscription, JSON.stringify(payload));
+      await webpush.sendNotification(rec.subscription, JSON.stringify(payload), { urgency: 'high', TTL: 3600 });
       await store.setJSON(b.key, rec);
       sent++;
     } catch (err) {
@@ -91,4 +91,4 @@ export default async () => {
   return new Response(`Sent ${sent}, cleaned ${cleaned}, subscribers ${blobs.length}`);
 };
 
-export const config = { schedule: '0 * * * *' };
+export const config = { schedule: '*/5 * * * *' };
