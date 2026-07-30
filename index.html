@@ -191,6 +191,16 @@
 
   document.getElementById('footerAffLink').href = AFFILIATE_URL;
 
+  // מזהה מכשיר קבוע - כדי שרישום חוזר מאותו טלפון לא יכפיל מנוי
+  function getDeviceId(){
+    let id = store.get('riki_device_id');
+    if(!id){
+      id = 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
+      store.set('riki_device_id', id);
+    }
+    return id;
+  }
+
   function uvColor(uv){
     if(uv < 3) return 'var(--uv-low)';
     if(uv < 6) return 'var(--uv-mid)';
@@ -308,7 +318,7 @@
       await fetch('/.netlify/functions/applied', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({endpoint: sub.endpoint})
+        body: JSON.stringify({endpoint: sub.endpoint, deviceId: getDeviceId()})
       });
     }catch(e){ /* דיווח רקע - נכשל בשקט, הטיימר המקומי ממשיך כרגיל */ }
   }
@@ -437,7 +447,7 @@
         const res = await fetch('/.netlify/functions/subscribe', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({subscription: sub, lat: userLoc.lat, lon: userLoc.lon})
+          body: JSON.stringify({subscription: sub, lat: userLoc.lat, lon: userLoc.lon, deviceId: getDeviceId()})
         });
         if(!res.ok) throw new Error('server');
         store.set('riki_push','on');
@@ -456,7 +466,7 @@
         await fetch('/.netlify/functions/subscribe', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({subscription: sub, lat: userLoc.lat, lon: userLoc.lon})
+          body: JSON.stringify({subscription: sub, lat: userLoc.lat, lon: userLoc.lon, deviceId: getDeviceId()})
         });
       }catch(e){ /* עדכון רקע - נכשל בשקט */ }
     }
