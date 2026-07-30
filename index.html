@@ -42,7 +42,9 @@
   .notify-card{background:var(--white);border-radius:16px;border-right:5px solid var(--accent);box-shadow:0 4px 16px rgba(26,26,26,.06);padding:18px 20px;margin-top:16px}
   .notify-card .n-title{font-size:1rem;font-weight:700;letter-spacing:-.16px}
   .notify-card .n-body{font-weight:300;font-size:.93rem;line-height:1.55;color:var(--ink-soft);margin-top:4px}
-  .notify-card.on{border-right-color:var(--uv-low)}
+  .notify-card.on{border:none;border-right:none;background:none;box-shadow:none;padding:6px 0;text-align:center}
+  .notify-card.on .n-title{font-size:.85rem;font-weight:400;color:var(--ink-soft)}
+  .notify-card.on .n-body{display:none}
   .ios-steps{background:var(--blush);border-radius:12px;padding:14px 16px;margin-top:12px;font-weight:300;font-size:.9rem;line-height:1.7;display:none}
   .ios-steps b{font-weight:700}
 
@@ -76,7 +78,7 @@
   .tips p:last-child{margin-bottom:0}
   .tips b{font-weight:700}
 
-  .cream-card{background:var(--accent);border-radius:22px;padding:22px;margin-top:16px;text-align:center;box-shadow:0 4px 16px rgba(26,26,26,.06)}
+  .cream-card{background:var(--blush);border-radius:22px;padding:22px;margin-top:16px;text-align:center;box-shadow:0 4px 16px rgba(26,26,26,.06)}
   .cream-card .c-title{font-size:1.05rem;font-weight:900;letter-spacing:-.32px}
   .cream-card .c-body{font-weight:300;font-size:.9rem;line-height:1.55;margin-top:4px}
   .cream-card a.btn-primary{display:block;text-decoration:none;text-align:center;margin-top:14px}
@@ -109,6 +111,12 @@
       </div>
     </div>
 
+      <div class="c-body">כל קרמי ההגנה שריקי מורחת בעצמה - עם ההסברים והקודים.</div>
+      <a href="#" id="footerAffLink" target="_blank" rel="noopener" class="btn-primary">לקרמים של ריקי ←</a>
+    </div>
+
+
+
     <div class="install-card" id="installCard">
       <div class="i-title">רוצה את ריקי על מסך הבית?</div>
       <div class="i-body" id="installBody">אייקון אחד, בלי חנות אפליקציות - וההתראות עובדות הכי טוב ככה.</div>
@@ -126,7 +134,8 @@
       <button class="btn-primary" id="notifyBtn">הפעילי לי תזכורות 🔔</button>
     </div>
 
-
+    <div class="cream-card">
+      <div class="c-title">רוצה המלצה לקרם הגנה מעולה?</div>
 
     <div class="section">
       <h2>השמש היום, שעה-שעה</h2>
@@ -155,11 +164,6 @@
       </div>
     </div>
 
-    <div class="cream-card">
-      <div class="c-title">רוצה המלצה לקרם הגנה מעולה?</div>
-      <div class="c-body">כל קרמי ההגנה שריקי מורחת בעצמה - עם ההסברים והקודים.</div>
-      <a href="#" id="footerAffLink" target="_blank" rel="noopener" class="btn-primary">לקרמים של ריקי ←</a>
-    </div>
     <div class="loc-line" id="locLine"></div>
   </div>
 </div>
@@ -457,8 +461,7 @@
 
     function markSubscribed(){
       card.classList.add('on');
-      title.textContent = 'ריקי על המשמרת ✓';
-      body.textContent = 'כשה-UV יעלה ויעברו שעתיים - תקבלי הודעה. כשהשמש תלך הביתה, ריקי תשתוק. מבטיחה.';
+      title.textContent = '✓ ריקי על המשמרת';
       btn.style.display = 'none';
     }
   }
