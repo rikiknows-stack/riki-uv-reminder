@@ -220,7 +220,7 @@
   }
 
   async function fetchUV(loc){
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&hourly=uv_index&current=uv_index&timezone=auto&forecast_days=1`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&hourly=uv_index,uv_index_clear_sky&current=uv_index,uv_index_clear_sky&timezone=auto&forecast_days=1`;
     const res = await fetch(url);
     if(!res.ok) throw new Error('api');
     return res.json();
@@ -228,8 +228,13 @@
 
   function render(data, loc){
     const nowHour = new Date().getHours();
-    uvNow = Math.round((data.current?.uv_index ?? 0)*10)/10;
-    hourly = data.hourly.time.map((t,i)=>({hour:new Date(t).getHours(), uv:data.hourly.uv_index[i]}));
+    // עננות מפחיתה את המדידה אבל לא באמת מגינה - לוקחים את הערך הגבוה מביניהם
+    const curRaw = Math.max(data.current?.uv_index ?? 0, data.current?.uv_index_clear_sky ?? 0);
+    uvNow = Math.round(curRaw*10)/10;
+    hourly = data.hourly.time.map((t,i)=>({
+      hour: new Date(t).getHours(),
+      uv: Math.max(data.hourly.uv_index?.[i] ?? 0, data.hourly.uv_index_clear_sky?.[i] ?? 0)
+    }));
 
     document.getElementById('uvNow').textContent = uvNow;
     const vt = document.getElementById('verdictText');
@@ -288,6 +293,7 @@
   }
 
   function showTimerUI(){
+    document.getElementById('appliedBtn').textContent = 'מרחתי עכשיו ✓';
     document.querySelector('#timerPanel .t-label').textContent = 'החידוש הבא בעוד';
     document.getElementById('resetBtn').classList.remove('hidden');
     document.getElementById('timerPanel').classList.add('show');
@@ -343,16 +349,18 @@
     if(left <= 0){
       clearInterval(timerInterval);
       store.set('riki_applied_at','0');
-      document.querySelector('#timerPanel .t-label').textContent = '';
       if(uvNow >= UV_THRESHOLD){
-        tTime.textContent = 'הגיע הזמן לחדש';
-        tNote.textContent = 'ריקי כבר שלחה תזכורת - שתי אצבעות ולוחצות שוב.';
-        document.getElementById('appliedBtn').classList.remove('hidden');
+        // הזמן הגיע - מציגים רק את הכפתור, בלי בלוק כפול
+        document.getElementById('timerPanel').classList.remove('show');
+        const btn = document.getElementById('appliedBtn');
+        btn.textContent = 'הגיע הזמן לחדש - מרחתי ✓';
+        btn.classList.remove('hidden');
       } else {
+        document.querySelector('#timerPanel .t-label').textContent = '';
         tTime.textContent = 'משוחררת עד מחר';
         tNote.textContent = 'עברו שעתיים אבל השמש כבר ירדה - אין צורך לחדש.';
+        document.getElementById('resetBtn').classList.add('hidden');
       }
-      document.getElementById('resetBtn').classList.add('hidden');
       return;
     }
     const m = Math.floor(left/60000), s = Math.floor((left%60000)/1000);
@@ -502,7 +510,7 @@
         times.push(new Date(new Date().setHours(h,0,0,0)).toISOString());
         uvs.push(demoUv[h] ?? 0);
       }
-      render({current:{uv_index: demoUv[nowH] ?? 0}, hourly:{time:times, uv_index:uvs}},
+      render({current:{uv_index: demoUv[nowH] ?? 0, uv_index_clear_sky: demoUv[nowH] ?? 0}, hourly:{time:times, uv_index:uvs, uv_index_clear_sky:uvs}},
              {name:'מצב דמו - נתונים לדוגמה (יעבוד באמת אחרי העלאה לנטליפיי)'});
     }
     resumeTimer();
