@@ -74,6 +74,15 @@
   .window-card .w-title{font-size:1rem;font-weight:700;letter-spacing:-.16px}
   .window-card .w-body{font-weight:300;font-size:.93rem;line-height:1.55;color:var(--ink-soft);margin-top:4px}
 
+  .faq{margin-top:16px}
+  .faq details{background:var(--white);border-radius:16px;box-shadow:0 4px 16px rgba(26,26,26,.06);margin-bottom:10px;overflow:hidden}
+  .faq summary{list-style:none;cursor:pointer;padding:16px 20px;font-size:.95rem;font-weight:700;letter-spacing:-.16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:'+';font-size:1.3rem;font-weight:400;color:var(--pink);line-height:1;flex-shrink:0}
+  .faq details[open] summary::after{content:'\2013'}
+  .faq details[open] summary{padding-bottom:6px}
+  .faq .a{padding:0 20px 18px;font-weight:300;font-size:.92rem;line-height:1.6;color:var(--ink-soft)}
+  .faq .a b{font-weight:700;color:var(--dark)}
   .tips{background:var(--blush);border-radius:22px;padding:22px;margin-top:16px}
   .tips p{font-weight:300;font-size:.93rem;line-height:1.55;margin-bottom:10px}
   .tips p:last-child{margin-bottom:0}
@@ -139,6 +148,25 @@
       <a href="#" id="footerAffLink" target="_blank" rel="noopener" class="btn-primary">לקרמים ←</a>
     </div>
 
+    <div class="faq">
+      <details>
+        <summary>למה דווקא כל שעתיים?</summary>
+        <div class="a">לא כי הקרם "מתפוגג" בשעון - אלא כי הוא <b>נשחק פיזית</b>: זיעה, שמן טבעי של העור, נגיעות בפנים, משקפיים, מגבת ומים. בחוץ השכבה נעלמת תוך שעתיים בערך, ומה שנשאר זו הגנה חלקית שמרגישה כמו הגנה מלאה. בפנים, בלי זיעה וחיכוך, השכבה מחזיקה הרבה יותר.</div>
+      </details>
+      <details>
+        <summary>מה זה "שתי אצבעות"?</summary>
+        <div class="a">מותחות פס קרם על אורך <b>האצבע המורה</b> ועוד פס על <b>האמה</b> - מקצה האצבע עד המפרק התחתון. שתיהן יחד = הכמות לפנים ולצוואר. זו הכמות שבה נבדק ה-SPF במעבדה; מריחה של חצי מזה נותנת הרבה פחות מחצי מההגנה. רוב האנשים מורחים כרבע ומאמינים שהם מוגנים.</div>
+      </details>
+      <details>
+        <summary>מה זה בכלל UV ומה המספרים אומרים?</summary>
+        <div class="a">מדד שמסכם כמה חזקה קרינת השמש עכשיו במקום שלכן - לפי גובה השמש, עונה, גובה מעל הים ומצב האוזון. <b>0-2</b> נמוך, השכבה של הבוקר מספיקה. <b>3-5</b> בינוני, מחדשות. <b>6-7</b> גבוה. <b>8 ומעלה</b> גבוה מאוד - כוויה יכולה להתחיל תוך פחות מרבע שעה. ריקי מתחילה להזכיר מ-3.</div>
+      </details>
+      <details>
+        <summary>ואם בפנים או ביום מעונן?</summary>
+        <div class="a"><b>חלון סגור:</b> הזכוכית חוסמת את רוב הקרינה השורפת, אבל UVA - זה שאחראי להזדקנות - עובר. מריחה אחת בבוקר מספיקה. <b>חלון פתוח או נהיגה עם חלון פתוח:</b> אתן בעצם בחוץ עם תקרה. <b>מעונן:</b> חלק ניכר מהקרינה עוברת דרך עננים דקים - זו בדיוק הסיבה שאנשים נשרפים ביום שלא הרגיש חם.</div>
+      </details>
+    </div>
+
     <div class="section">
       <h2>השמש היום, שעה-שעה</h2>
       <div class="chart-card">
@@ -161,9 +189,8 @@
       <div class="tips">
         <p><b>מריחת בוקר:</b> תמיד, בלי לבדוק כלום. הכלי אומר מתי לחדש - לא אם למרוח.</p>
         <p><b>הכלל לחידושים:</b> UV מ-3 ומעלה = מחדשות כל שעתיים. מתחת לזה - השכבה של הבוקר מחזיקה.</p>
-        <p><b>הכמות:</b> שתי אצבעות לפנים. לא "קצת על הלחיים", שתי אצבעות. ריקי סופרת.</p>
-        <p><b>בפנים כל היום?</b> ליד חלון גדול UVA עדיין עובר. מריחה אחת בבוקר מספיקה.</p>
       </div>
+
     </div>
 
     <div class="loc-line" id="locLine"></div>
@@ -220,10 +247,19 @@
   }
 
   async function fetchUV(loc){
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&hourly=uv_index,uv_index_clear_sky&current=uv_index,uv_index_clear_sky&timezone=auto&forecast_days=1`;
-    const res = await fetch(url);
-    if(!res.ok) throw new Error('api');
-    return res.json();
+    // ה-UV של Open-Meteo חי ב-API של איכות האוויר, וכולל גם ערך "שמיים בהירים"
+    const aq = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${loc.lat}&longitude=${loc.lon}&hourly=uv_index,uv_index_clear_sky&current=uv_index,uv_index_clear_sky&timezone=auto&forecast_days=1`;
+    try{
+      const res = await fetch(aq);
+      if(res.ok){
+        const data = await res.json();
+        if(data?.current && data?.hourly) return data;
+      }
+    }catch(e){ /* נופלים ל-API הרגיל */ }
+    const fallback = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&hourly=uv_index&current=uv_index&timezone=auto&forecast_days=1`;
+    const res2 = await fetch(fallback);
+    if(!res2.ok) throw new Error('api');
+    return res2.json();
   }
 
   function render(data, loc){
