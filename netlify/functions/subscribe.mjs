@@ -25,7 +25,10 @@ export default async (req) => {
       createdAt: existing?.createdAt || new Date().toISOString(),
       lastNotified: existing?.lastNotified || Date.now(),
       lastApplied: existing?.lastApplied || 0,
-      lastEveningDate: existing?.lastEveningDate || ''
+      lastEveningDate: existing?.lastEveningDate || '',
+      // תאריך תזכורת היום האחרונה - הודעת הערב נשלחת רק אם הוא היום.
+      // מנויה חדשה מתחילה ריק: בלי תזכורת יום, אין "לילה טוב".
+      lastDayReminderDate: existing?.lastDayReminderDate || ''
     });
     console.log(`Subscribe: ${existing ? 'updated' : 'new'} record`);
     return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
