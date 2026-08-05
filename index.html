@@ -47,6 +47,7 @@
   .notify-card.on .n-title{font-size:.85rem;font-weight:400;color:var(--ink-soft)}
   .notify-card.on .n-body{display:none}
   .ios-steps{background:var(--blush);border-radius:12px;padding:14px 16px;margin-top:12px;font-weight:300;font-size:.9rem;line-height:1.7;display:none}
+  .ios-steps.show{display:block}
   .ios-steps b{font-weight:700}
 
   .timer-inline{background:var(--dark);color:var(--white);border-radius:10px;padding:9px 20px;margin-top:10px;display:none}
@@ -161,9 +162,10 @@
 
     <div class="help-card" id="helpCard">
       <details>
-        <summary>איך לוודא שריקי באמת תגיע</summary>
+        <summary>איך לוודא שתקבלי התראות מריקי</summary>
         <div class="h-body">
-          <p>הטלפון יודע להרדים אפליקציות שהוא לא מכיר, וההתראה מגיעה באיחור או בשקט גמור. שתי דקות של הגדרות פותרות את זה.</p>
+          <p><b>קודם כל - ריקי על מסך הבית.</b> באייפון ההתראות עובדות <b>רק</b> מהאפליקציה, לא מהדפדפן. באנדרואיד הן יעבדו גם מהדפדפן, אבל מחיקת נתוני גלישה תמחק אותן - אז עדיף גם שם.</p>
+          <p>ואחרי זה: הטלפון יודע להרדים אפליקציות שהוא לא מכיר, וההתראה מגיעה באיחור או בשקט גמור. שתי דקות של הגדרות פותרות את זה.</p>
           <div class="h-plat" id="platAndroid">
             <span class="h-name">אנדרואיד</span>
             לחיצה ארוכה על האייקון של ריקי ← <b>מידע על האפליקציה</b><br>
@@ -597,6 +599,8 @@
     const btn = document.getElementById('notifyBtn');
 
     if(isIOS && !isStandalone){
+      // באייפון פוש עובד רק מאפליקציה על מסך הבית - מסבירים במקום להשאיר כפתור מת
+      document.getElementById('iosSteps').classList.add('show');
       btn.textContent = 'קודם שומרים כאפליקציה 👆';
       btn.disabled = true;
       return;
