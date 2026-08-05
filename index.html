@@ -94,6 +94,24 @@
   .cream-card .c-body{font-weight:300;font-size:.8rem;line-height:1.4;margin-top:2px;color:var(--ink-soft)}
   .cream-card a.btn-primary{display:block;text-decoration:none;text-align:center;margin-top:0;width:auto;padding:10px 14px;font-size:.85rem;white-space:nowrap}
 
+  .verdict .btn-retry{background:rgba(255,255,255,.8);color:var(--dark);border:none;border-radius:10px;padding:10px 22px;font-family:'Heebo';font-weight:700;font-size:.9rem;cursor:pointer;margin-top:12px;width:100%}
+  .verdict .btn-retry:active{opacity:.8}
+
+  .help-card{margin-top:12px;display:none}
+  .help-card.show{display:block}
+  .help-card details{background:var(--white);border-radius:16px;box-shadow:0 4px 16px rgba(26,26,26,.06);overflow:hidden}
+  .help-card summary{list-style:none;cursor:pointer;padding:15px 20px;font-size:.93rem;font-weight:700;letter-spacing:-.16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .help-card summary::-webkit-details-marker{display:none}
+  .help-card summary::after{content:'+';font-size:1.3rem;font-weight:400;color:var(--pink);line-height:1;flex-shrink:0}
+  .help-card details[open] summary::after{content:'\2013'}
+  .help-card details[open] summary{padding-bottom:4px}
+  .help-card .h-body{padding:0 20px 18px}
+  .help-card .h-body p{font-weight:300;font-size:.9rem;line-height:1.65;color:var(--ink-soft);margin-bottom:12px}
+  .help-card .h-body p:last-child{margin-bottom:0}
+  .help-card .h-body b{font-weight:700;color:var(--dark)}
+  .help-card .h-plat{background:var(--blush);border-radius:12px;padding:13px 15px;margin-bottom:12px;font-weight:300;font-size:.9rem;line-height:1.7;color:var(--dark)}
+  .help-card .h-plat .h-name{font-weight:900;font-size:.95rem;display:block;margin-bottom:4px}
+
   .loading{text-align:center;padding:40px 20px;font-weight:300;color:var(--ink-soft)}
   .loc-line{text-align:center;font-size:.78rem;font-weight:400;color:var(--ink-soft);margin-top:12px}
   .hidden{display:none}
@@ -114,6 +132,7 @@
       <div class="uv-big" id="uvNow">-</div>
       <div class="verdict-text" id="verdictText"></div>
       <div class="verdict-sub" id="verdictSub"></div>
+      <button class="btn-retry hidden" id="retryBtn">לנסות שוב</button>
       <button class="btn-primary" id="appliedBtn">מרחתי עכשיו ✓</button>
       <div class="timer-inline" id="timerPanel">
         <div class="t-label">החידוש הבא בעוד</div>
@@ -138,6 +157,30 @@
         2. לפתוח את ריקי מהאייקון החדש וללחוץ שוב על הכפתור כאן
       </div>
       <button class="btn-primary" id="notifyBtn">הפעילי לי תזכורות 🔔</button>
+    </div>
+
+    <div class="help-card" id="helpCard">
+      <details>
+        <summary>איך לוודא שריקי באמת תגיע</summary>
+        <div class="h-body">
+          <p>הטלפון יודע להרדים אפליקציות שהוא לא מכיר, וההתראה מגיעה באיחור או בשקט גמור. שתי דקות של הגדרות פותרות את זה.</p>
+          <div class="h-plat" id="platAndroid">
+            <span class="h-name">אנדרואיד</span>
+            לחיצה ארוכה על האייקון של ריקי ← <b>מידע על האפליקציה</b><br>
+            · <b>סוללה</b> ← לבחור <b>ללא הגבלה</b> (לפעמים כתוב "לא מוגבל")<br>
+            · <b>התראות</b> ← מופעל, ולוודא ש<b>צליל</b> דלוק ולא על שקט<br>
+            בסמסונג יש עוד מקום אחד: הגדרות ← טיפול במכשיר ← סוללה ← מגבלות שימוש ברקע - לוודא שריקי לא ברשימת הישנות.
+          </div>
+          <div class="h-plat" id="platIOS">
+            <span class="h-name">אייפון</span>
+            הגדרות ← <b>התראות</b> ← לגלול עד ריקי<br>
+            · <b>אפשר התראות</b> דלוק, וגם <b>צלילים</b><br>
+            · <b>מסירת התראות</b> ← <b>מיידית</b>. אם זה על "סיכום מתוזמן", ההתראה מחכה לערב ומגיעה אחרי שהשמש ירדה<br>
+            · אם יש <b>מיקוד</b> (Focus) או "נא לא להפריע" - להוסיף את ריקי לרשימת המורשות.
+          </div>
+          <p><b>ואם עבר יום שלם בלי כלום:</b> ריקי מזכירה רק כשה-UV מעל 3. יום שקט זה לא תקלה - זו שמש חלשה.</p>
+        </div>
+      </details>
     </div>
 
     <div class="cream-card">
@@ -167,7 +210,7 @@
       </details>
     </div>
 
-    <div class="section">
+    <div class="section" id="sunSection">
       <h2>השמש היום, שעה-שעה</h2>
       <div class="chart-card">
         <div class="bars" id="bars"></div>
@@ -208,6 +251,12 @@
   const UV_THRESHOLD = 3;
   const REAPPLY_MS = 115*60*1000; // מיושר לשעון השרת - שעה ו-55 דק'
   let hourly = [], uvNow = 0, timerInterval = null, appliedAt = null, userLoc = FALLBACK;
+  // uvKnown = האם באמת יש נתוני שמש. כשהוא false אסור לכלי לטעון שום דבר על ה-UV -
+  // לא "לחדש" ולא "משוחררת". שתיהן טענות, ובלי נתונים אין לנו אף אחת מהן.
+  let uvKnown = false;
+  // האם דיווח "מרחתי" האחרון הגיע לשרת. false = השרת סופר לפי השעון הישן
+  // וההתראה הבאה עלולה להגיע לא מסונכרנת עם הטיימר שעל המסך.
+  let appliedSyncFailed = false;
 
   // אחסון בטוח - נופל לזיכרון אם localStorage חסום (למשל בתצוגה מקדימה)
   const mem = {};
@@ -263,6 +312,11 @@
   }
 
   function render(data, loc){
+    uvKnown = true;
+    document.getElementById('retryBtn').classList.add('hidden');
+    document.querySelector('#verdict .uv-label').classList.remove('hidden');
+    document.getElementById('uvNow').classList.remove('hidden');
+    document.getElementById('sunSection').classList.remove('hidden');
     const nowHour = new Date().getHours();
     // עננות מפחיתה את המדידה אבל לא באמת מגינה - לוקחים את הערך הגבוה מביניהם
     const curRaw = Math.max(data.current?.uv_index ?? 0, data.current?.uv_index_clear_sky ?? 0);
@@ -321,6 +375,49 @@
     document.getElementById('app').classList.remove('hidden');
   }
 
+  // כשאין נתוני שמש - לא ממציאים מספר ולא פוסקים.
+  // אומרים מה ידוע, מה לא, ומשאירים את ההחלטה אצלה עם נטייה להגנה.
+  function renderNoData(){
+    uvKnown = false;
+    hourly = [];
+    uvNow = 0;
+
+    document.querySelector('#verdict .uv-label').classList.add('hidden');
+    document.getElementById('uvNow').classList.add('hidden');
+    document.getElementById('verdictText').textContent = 'ריקי לא רואה את השמש כרגע';
+    document.getElementById('verdictSub').textContent = 'החיבור לנתוני ה-UV לא עובד. אם את בחוץ - מרחי, ואל תסמכי על ריקי ברגע הזה.';
+    document.getElementById('retryBtn').classList.remove('hidden');
+    document.getElementById('appliedBtn').classList.remove('hidden');
+
+    // הגרף וחלון החידושים תלויים לגמרי בנתונים - מוסתרים במקום להציג ריק
+    document.getElementById('sunSection').classList.add('hidden');
+    document.getElementById('locLine').textContent = '';
+
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+  }
+
+  async function loadUV(){
+    try{
+      userLoc = await getLocation();
+      const data = await fetchUV(userLoc);
+      render(data, userLoc);
+      return true;
+    }catch(e){
+      renderNoData();
+      return false;
+    }
+  }
+
+  document.getElementById('retryBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('retryBtn');
+    btn.disabled = true; btn.textContent = 'רגע, בודקת...';
+    await loadUV();
+    btn.disabled = false; btn.textContent = 'לנסות שוב';
+    // הטיימר לא מתאפס בניסיון חוזר - הוא חי ב-localStorage וממשיך משם
+    resumeTimer();
+  });
+
   // ====== טיימר ======
   function nextUvBelowThresholdAfter(dateMs){
     const h = new Date(dateMs).getHours();
@@ -337,7 +434,8 @@
   }
   function hideTimerUI(){
     document.getElementById('timerPanel').classList.remove('show');
-    if(uvNow >= UV_THRESHOLD) document.getElementById('appliedBtn').classList.remove('hidden');
+    // בלי נתוני שמש הכפתור נשאר זמין - היא אולי בחוץ, וריקי לא יודעת לומר שלא
+    if(!uvKnown || uvNow >= UV_THRESHOLD) document.getElementById('appliedBtn').classList.remove('hidden');
   }
 
   function startTimer(){
@@ -347,22 +445,37 @@
     tick();
     if(timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(tick, 1000);
-    reportApplied(); // סנכרון לשרת - ההתראה הבאה תיספר מהמריחה הזו
+    reportApplied(false); // סנכרון לשרת - ההתראה הבאה תיספר מהמריחה הזו
   }
 
-  // דיווח לשרת שמרחת - כדי ששעון ההתראות יתיישר עם השעון שלך
-  async function reportApplied(){
-    try{
-      if(!('serviceWorker' in navigator)) return;
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.getSubscription();
-      if(!sub) return; // לא רשומה להתראות - אין שעון שרת ליישר
-      await fetch('/.netlify/functions/applied', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({endpoint: sub.endpoint, deviceId: getDeviceId()})
-      });
-    }catch(e){ /* דיווח רקע - נכשל בשקט, הטיימר המקומי ממשיך כרגיל */ }
+  // דיווח לשרת - מריחה או איפוס - כדי ששעון ההתראות יתיישר עם השעון שעל המסך.
+  // בודקים שהשרת באמת רשם: תשובה כושלת = הטיימר פה והשעון שם מתפצלים,
+  // ואז אומרים את זה למשתמשת במקום להעמיד פנים שהכל מסונכרן.
+  async function reportToServer(payload){
+    if(!('serviceWorker' in navigator)) return true; // אין פוש - אין שעון שרת ליישר
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if(!sub) return true; // לא רשומה להתראות - הטיימר המקומי הוא היחיד, וזה בסדר
+    const res = await fetch('/.netlify/functions/applied', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({endpoint: sub.endpoint, deviceId: getDeviceId(), ...payload})
+    });
+    if(!res.ok) return false;
+    const j = await res.json().catch(()=>({}));
+    return j.ok === true;
+  }
+
+  async function reportApplied(reset){
+    appliedSyncFailed = false;
+    let ok = false;
+    try{ ok = await reportToServer(reset ? {reset:true} : {}); }catch(e){ ok = false; }
+    if(!ok){
+      // ניסיון שני אחרי רגע - רוב הכשלים הם גמגום רשת רגעי
+      await new Promise(r=>setTimeout(r, 4000));
+      try{ ok = await reportToServer(reset ? {reset:true} : {}); }catch(e){ ok = false; }
+    }
+    if(!ok) appliedSyncFailed = true;
   }
 
   // שחזור טיימר פעיל אחרי סגירה ופתיחה מחדש
@@ -385,7 +498,13 @@
     if(left <= 0){
       clearInterval(timerInterval);
       store.set('riki_applied_at','0');
-      if(uvNow >= UV_THRESHOLD){
+      if(!uvKnown){
+        // אין נתונים - לא אומרים "לחדש" ולא "משוחררת". רק מה שידוע: עברו שעתיים.
+        document.getElementById('timerPanel').classList.remove('show');
+        const btn = document.getElementById('appliedBtn');
+        btn.textContent = 'עברו שעתיים - אם את בחוץ, מרחי ✓';
+        btn.classList.remove('hidden');
+      } else if(uvNow >= UV_THRESHOLD){
         // הזמן הגיע - מציגים רק את הכפתור, בלי בלוק כפול
         document.getElementById('timerPanel').classList.remove('show');
         const btn = document.getElementById('appliedBtn');
@@ -401,9 +520,15 @@
     }
     const m = Math.floor(left/60000), s = Math.floor((left%60000)/1000);
     tTime.textContent = String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
-    tNote.textContent = nextUvBelowThresholdAfter(appliedAt + REAPPLY_MS)
-      ? 'עד אז השמש כבר תסיים משמרת - אז זו כנראה המריחה האחרונה להיום 🎉'
-      : 'כשהטיימר מגיע לאפס - מחדשות. שתי אצבעות, כן?';
+    if(appliedSyncFailed){
+      tNote.textContent = 'הספירה פה רצה, אבל השרת של ההתראות לא קיבל את העדכון - ייתכן שההתראה הבאה תגיע לפי השעון הקודם.';
+    } else if(!uvKnown){
+      tNote.textContent = 'הספירה ממשיכה, אבל ריקי לא רואה כרגע מה השמש עושה.';
+    } else {
+      tNote.textContent = nextUvBelowThresholdAfter(appliedAt + REAPPLY_MS)
+        ? 'עד אז השמש כבר תסיים משמרת - אז זו כנראה המריחה האחרונה להיום 🎉'
+        : 'כשהטיימר מגיע לאפס - מחדשות. שתי אצבעות, כן?';
+    }
   }
 
 
@@ -450,6 +575,19 @@
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
     const rawData = atob(base64);
     return Uint8Array.from([...rawData].map(c=>c.charCodeAt(0)));
+  }
+
+  // ההסבר על הגדרות הטלפון - מופיע רק אחרי שנרשמו, כדי לא להוסיף חיכוך לפני.
+  // מסדר את הפלטפורמה של המשתמשת ראשונה, אבל מציג את שתיהן: זיהוי דפדפן לא אמין,
+  // ועדיף שתראה שורה מיותרת מאשר שתחפש הוראה שלא קיימת אצלה.
+  function showHelpCard(){
+    const help = document.getElementById('helpCard');
+    if(!help) return;
+    if(isIOS){
+      const ios = document.getElementById('platIOS');
+      ios.parentNode.insertBefore(ios, document.getElementById('platAndroid'));
+    }
+    help.classList.add('show');
   }
 
   async function setupNotifications(){
@@ -519,6 +657,7 @@
       card.classList.add('on');
       title.textContent = '✓ ריקי על המשמרת';
       btn.style.display = 'none';
+      showHelpCard();
     }
   }
 
@@ -527,28 +666,15 @@
     clearInterval(timerInterval);
     store.set('riki_applied_at','0');
     hideTimerUI();
+    // איפוס גם בשרת - אחרת ההתראות ממשיכות להיספר מהלחיצה שבוטלה
+    reportApplied(true);
   });
 
   (async function init(){
     if('serviceWorker' in navigator){
       try{ navigator.serviceWorker.register('sw.js'); }catch(e){}
     }
-    try{
-      userLoc = await getLocation();
-      const data = await fetchUV(userLoc);
-      render(data, userLoc);
-    }catch(e){
-      // מצב דמו - כשה-API חסום (למשל בתצוגה מקדימה)
-      const demoUv = {5:0,6:0.3,7:1.2,8:2.8,9:4.5,10:6.5,11:8.2,12:9.5,13:9.8,14:9,15:7.2,16:5,17:3.2,18:1.5,19:0.4,20:0};
-      const nowH = new Date().getHours();
-      const times = [], uvs = [];
-      for(let h=0; h<24; h++){
-        times.push(new Date(new Date().setHours(h,0,0,0)).toISOString());
-        uvs.push(demoUv[h] ?? 0);
-      }
-      render({current:{uv_index: demoUv[nowH] ?? 0, uv_index_clear_sky: demoUv[nowH] ?? 0}, hourly:{time:times, uv_index:uvs, uv_index_clear_sky:uvs}},
-             {name:'מצב דמו - נתונים לדוגמה (יעבוד באמת אחרי העלאה לנטליפיי)'});
-    }
+    await loadUV();
     resumeTimer();
     setupInstallBanner();
     setupNotifications();
