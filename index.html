@@ -771,11 +771,19 @@
   // זו ספירת דיווחים, לא ספירת מריחות בפועל - וכל הטקסטים נאמנים לזה.
   function todayKey(){ return new Date().toLocaleDateString('en-CA'); }
   function readLog(){
+    let taps = [];
     try{
       const raw = JSON.parse(store.get('riki_day_log') || 'null');
-      if(raw && raw.date === todayKey() && Array.isArray(raw.taps)) return raw.taps;
+      if(raw && raw.date === todayKey() && Array.isArray(raw.taps)) taps = raw.taps;
     }catch(e){}
-    return [];
+    // טיימר שרץ ממריחה שלא ביומן (גרסה קודמת, או יום שהתחלף באמצע ספירה) -
+    // משלימים את השורה מזמן הטיימר. זה תיעוד אמיתי של לחיצה, לא המצאה.
+    const at = parseInt(store.get('riki_applied_at')||'0',10);
+    if(at > 0 && new Date(at).toLocaleDateString('en-CA') === todayKey() && !taps.includes(at) && (!taps.length || at > taps[taps.length-1])){
+      taps.push(at);
+      writeLog(taps);
+    }
+    return taps;
   }
   function writeLog(taps){ store.set('riki_day_log', JSON.stringify({date: todayKey(), taps})); }
   function logTap(){ const t = readLog(); t.push(Date.now()); writeLog(t); }
