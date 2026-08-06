@@ -140,12 +140,13 @@
   .day-top .ava-wrap{position:relative;flex-shrink:0}
   .day-top .ava-wrap::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1.5px dashed #D4ADA4;pointer-events:none}
   .day-lbl{font-size:.76rem;font-weight:500;letter-spacing:.09em;color:rgba(26,26,26,.6)}
-  .day-title{font-weight:200;font-size:1.6rem;letter-spacing:-.03em;line-height:1.1;margin-top:1px}
+  .day-title{font-weight:200;font-size:1.5rem;letter-spacing:-.03em;line-height:1.12;margin-top:1px}
+  .day-title{position:relative;z-index:0}
   .day-title .mk{font-weight:600;position:relative;z-index:0;display:inline-block}
-  .day-title .mk::after{content:'';position:absolute;z-index:-1;left:-.12em;right:-.12em;bottom:.05em;height:.42em;background:#F6E4B6;border-radius:40% 60% 55% 45%;transform:rotate(-1.2deg)}
+  .day-title .mk::after{content:'';position:absolute;z-index:-1;left:-.12em;right:-.12em;bottom:.14em;height:.4em;background:#F6E4B6;border-radius:40% 60% 55% 45%;transform:rotate(-1.2deg)}
   .day-cheer{font-weight:400;font-size:.92rem;color:rgba(26,26,26,.78);margin-top:3px}
 
-  .dial-card{background:var(--white);border-radius:24px;box-shadow:0 10px 34px rgba(26,26,26,.04);padding:13px 15px;margin-top:12px;display:flex;align-items:center;gap:13px}
+  .dial-card{background:var(--white);border-radius:24px;box-shadow:0 10px 34px rgba(26,26,26,.04);padding:13px 15px;margin-top:16px;display:flex;align-items:center;gap:13px}
   .dial-card.dim svg{opacity:.6}
   .dial-card svg{flex-shrink:0}
   .dial-meta{flex:1;text-align:right}
@@ -232,7 +233,7 @@
       <div class="day-cheer" id="dayCheer"></div>
     </div>
   </div>
-  <p class="subtitle">מתי באמת צריך לחדש קרם הגנה - לפי השמש, לא לפי תחושת אשמה. ריקי בודקת את ה-UV במקומכן.</p>
+  <p class="subtitle hidden" id="introLine">מתי באמת צריך לחדש קרם הגנה - לפי השמש, לא לפי תחושת אשמה. ריקי בודקת את ה-UV במקומכן.</p>
 
   <div class="loading" id="loading">ריקי בודקת מה השמש עושה עכשיו...</div>
 
@@ -471,6 +472,9 @@
     tomorrowHourly = all.filter(h=>h.date > today);
 
     applyScreen();
+    // שורת ההיכרות - רק למי שבאמת חדשה: אף מריחה מעולם ולא מותקן כאפליקציה
+    const everTapped = !!store.get('riki_day_log') || parseInt(store.get('riki_applied_at')||'0',10) > 0;
+    document.getElementById('introLine').classList.toggle('hidden', everTapped || isStandalone);
     document.getElementById('locLine').textContent = '☀️ נתוני UV לפי ' + loc.name + ' · מקור: Open-Meteo';
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
@@ -500,7 +504,8 @@
       cheer.textContent = 'UV נמוך לאורך כל היום. יום נדיר - תיהני ממנו.';
     } else if(taps.length === 0){
       title.innerHTML = 'יאללה, <span class="mk">מורחות</span>?';
-      cheer.textContent = uvNow < UV_THRESHOLD ? 'השמש רק קמה. את מקדימה אותה.' : 'מריחת בוקר עושים תמיד - גם כשמתחילים באמצע היום.';
+      // כרטיס הבוקר בציר כבר אומר "מריחת בוקר עושים תמיד" - לא חוזרים על זה פה
+      cheer.textContent = uvNow < UV_THRESHOLD ? 'השמש רק קמה. את מקדימה אותה.' : '';
     } else if(taps.length === 1){
       title.innerHTML = 'מרחת <span class="mk">הבוקר</span>';
       cheer.textContent = CHEERS[1];
@@ -730,6 +735,7 @@
     try{
       userLoc = await getLocation();
       const data = await fetchUV(userLoc);
+      lastUvFetch = Date.now();
       render(data, userLoc);
       return true;
     }catch(e){
@@ -737,6 +743,19 @@
       return false;
     }
   }
+
+  // חזרה מהרקע: המסך נבנה בפתיחה וקופא - התראה שלחצו עליה, שעה שהתחלפה,
+  // מריחה שנרשמה בטאב אחר. כשחוזרים לחזית - מסנכרנים הכל בלי רענון ידני.
+  let lastUvFetch = 0;
+  document.addEventListener('visibilitychange', async ()=>{
+    if(document.visibilityState !== 'visible') return;
+    resumeTimer();                              // הטיימר מהאחסון - תופס מריחה מטאב אחר
+    if(Date.now() - lastUvFetch > 15*60*1000){  // UV מתעדכן אם עבר רבע שעה
+      await loadUV();
+    } else if(uvKnown){
+      applyScreen();                            // אחרת רק בנייה מחדש - שעה, יומן, כפתור
+    }
+  });
 
   document.getElementById('retryBtn').addEventListener('click', async ()=>{
     const btn = document.getElementById('retryBtn');
