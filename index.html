@@ -16,7 +16,7 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Heebo',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh}
-  .wrap{max-width:520px;margin:0 auto;padding:28px 18px 60px}
+  .wrap{max-width:520px;margin:0 auto;padding:28px 18px calc(150px + env(safe-area-inset-bottom,0px))}
 
   .top-label{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);text-align:center;margin-bottom:10px}
   .hero-img{display:block;width:60px;height:60px;border-radius:50%;margin:0 auto 8px;object-fit:cover}
@@ -113,6 +113,23 @@
   .help-card .h-plat{background:var(--blush);border-radius:12px;padding:13px 15px;margin-bottom:12px;font-weight:300;font-size:.9rem;line-height:1.7;color:var(--dark)}
   .help-card .h-plat .h-name{font-weight:900;font-size:.95rem;display:block;margin-bottom:4px}
 
+  /* סרגל פעולה קבוע - הכפתור תמיד בהישג יד, גם באמצע גלילה */
+  .action-bar{position:fixed;left:0;right:0;bottom:0;background:var(--white);border-top:1px solid rgba(26,26,26,.07);
+    box-shadow:0 -4px 20px rgba(26,26,26,.06);z-index:60;
+    padding:11px 18px calc(11px + env(safe-area-inset-bottom,0px))}
+  .action-bar .bar-inner{max-width:520px;margin:0 auto}
+  .action-bar .btn-primary{margin-top:0}
+  .bar-idle{display:none;text-align:center;font-weight:300;font-size:.92rem;color:var(--ink-soft);padding:6px 0}
+  .bar-idle.show{display:block}
+  /* הטיימר בתוך הסרגל - שורה אחת: ספירה מימין, איפוס משמאל */
+  .action-bar .timer-inline{background:none;color:var(--dark);border-radius:0;padding:0;margin-top:0}
+  .action-bar .timer-inline .t-row{display:flex;align-items:center;gap:12px}
+  .action-bar .timer-inline .t-main{flex:1;min-width:0;text-align:right}
+  .action-bar .timer-inline .t-label{opacity:.55;color:var(--ink-soft)}
+  .action-bar .timer-inline .t-time{font-size:1.4rem}
+  .action-bar .timer-inline .t-note{opacity:1;color:var(--ink-soft);margin-top:3px;font-size:.8rem}
+  .action-bar .t-reset{color:var(--ink-soft);opacity:.75;margin-top:0;flex-shrink:0}
+
   .loading{text-align:center;padding:40px 20px;font-weight:300;color:var(--ink-soft)}
   .loc-line{text-align:center;font-size:.78rem;font-weight:400;color:var(--ink-soft);margin-top:12px}
   .hidden{display:none}
@@ -134,13 +151,6 @@
       <div class="verdict-text" id="verdictText"></div>
       <div class="verdict-sub" id="verdictSub"></div>
       <button class="btn-retry hidden" id="retryBtn">לנסות שוב</button>
-      <button class="btn-primary" id="appliedBtn">מרחתי עכשיו ✓</button>
-      <div class="timer-inline" id="timerPanel">
-        <div class="t-label">החידוש הבא בעוד</div>
-        <div class="t-time" id="timerTime">--:--</div>
-        <div class="t-note" id="timerNote"></div>
-        <button class="t-reset" id="resetBtn">טעות? איפוס</button>
-      </div>
     </div>
 
     <div class="install-card" id="installCard">
@@ -239,6 +249,23 @@
     </div>
 
     <div class="loc-line" id="locLine"></div>
+
+    <div class="action-bar" id="actionBar">
+      <div class="bar-inner">
+        <button class="btn-primary" id="appliedBtn">מרחתי עכשיו ✓</button>
+        <div class="timer-inline" id="timerPanel">
+          <div class="t-row">
+            <div class="t-main">
+              <div class="t-label">החידוש הבא בעוד</div>
+              <div class="t-time" id="timerTime">--:--</div>
+            </div>
+            <button class="t-reset" id="resetBtn">טעות? איפוס</button>
+          </div>
+          <div class="t-note" id="timerNote"></div>
+        </div>
+        <div class="bar-idle" id="barIdle">משוחררת עד מחר בבוקר 🌙</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -419,6 +446,25 @@
     // הטיימר לא מתאפס בניסיון חוזר - הוא חי ב-localStorage וממשיך משם
     resumeTimer();
   });
+
+  // הסרגל אף פעם לא ריק: כפתור, או ספירה, או שורת מצב.
+  // מאזין לשינויי מחלקה במקום לקריאה מכל מקום שמסתיר או מציג - ככה אי אפשר לפספס מצב.
+  function syncBar(){
+    const btn = document.getElementById('appliedBtn');
+    const panel = document.getElementById('timerPanel');
+    const idle = document.getElementById('barIdle');
+    if(!btn || !panel || !idle) return;
+    const busy = !btn.classList.contains('hidden') || panel.classList.contains('show');
+    idle.classList.toggle('show', !busy);
+  }
+  (function watchBar(){
+    const obs = new MutationObserver(syncBar);
+    ['appliedBtn','timerPanel'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) obs.observe(el, {attributes:true, attributeFilter:['class']});
+    });
+    syncBar();
+  })();
 
   // ====== טיימר ======
   function nextUvBelowThresholdAfter(dateMs){
