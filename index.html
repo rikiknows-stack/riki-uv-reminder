@@ -515,6 +515,7 @@
     }
 
     // --- הטבעת ---
+    document.getElementById('uvNow').textContent = uvNow;
     drawDial(nowHour, closing);
     const lv = uvNow >= 8 ? 'גבוה מאוד' : uvNow >= 6 ? 'גבוה' : uvNow >= UV_THRESHOLD ? 'בינוני' : 'נמוך';
     document.getElementById('dialM1').textContent = 'UV עכשיו · ' + lv + ' · ' + String(nowHour).padStart(2,'0') + ':00';
