@@ -603,9 +603,15 @@
     taps.forEach((ms,i)=>{
       const h = new Date(ms).getHours();
       const uvAtTap = hourly.find(x=>x.hour===h)?.uv;
-      let sub = '';
-      if(i===0 && uvAtTap != null) sub = 'UV היה ' + (Math.round(uvAtTap*10)/10) + ' - יצאת מוגנת.';
-      if(h === peakHour && i>0) sub = 'שיא ה-UV של היום.';
+      const n = i + 1; // מספר החידוש הסידורי - הפרגון קבוע לפי המקום, לא משתנה כשצצות עוד שורות
+      let sub;
+      if(i === 0){
+        sub = uvAtTap != null ? 'UV היה ' + (Math.round(uvAtTap*10)/10) + ' - יצאת מוגנת.' : '';
+      } else {
+        sub = ROW_CHEERS[n] || 'ריקי רושמת. ממשיכות ככה.';
+        // "שיא ה-UV" גובר רק כשהחידוש באמת נפל בשעת השיא - שם זה מוסיף מידע
+        if(h === peakHour) sub = 'בול על שיא ה-UV של היום. 🎯';
+      }
       rows.push({kind:'past', time: fmtT(ms), name: i===0 ? 'מריחת בוקר ✓' : 'חידוש ✓', sub});
     });
 
@@ -787,12 +793,28 @@
     return taps;
   }
   function writeLog(taps){ store.set('riki_day_log', JSON.stringify({date: todayKey(), taps})); }
-  function logTap(){ const t = readLog(); t.push(Date.now()); writeLog(t); }
+  function logTap(){
+    // קוראים גולמי (בלי הפיוס מ-applied_at) ומוסיפים. המשמר מפני כפילות יושב ב-startTimer.
+    let t = [];
+    try{
+      const raw = JSON.parse(store.get('riki_day_log') || 'null');
+      if(raw && raw.date === todayKey() && Array.isArray(raw.taps)) t = raw.taps;
+    }catch(e){}
+    t.push(appliedAt || Date.now()); writeLog(t);
+  }
   function unlogTap(){ const t = readLog(); t.pop(); writeLog(t); }
 
   function countWord(n){
     return ['','פעם אחת','פעמיים','שלוש פעמים','ארבע פעמים','חמש פעמים','שש פעמים','שבע פעמים'][n] || (n + ' פעמים');
   }
+  // פרגון לשורת החידוש בציר - לפי המספר הסידורי של השורה
+  const ROW_CHEERS = {
+    2: 'מוגנת פעמיים. יפה.',
+    3: 'מגיע לך גלידה. 🍦',
+    4: 'רביעייה. העור שלך אומר תודה.',
+    5: 'חמש. אלופה רשמית.',
+    6: 'שש פעמים - ריקי גאה.'
+  };
   const CHEERS = {
     1: 'ווהו אלופה - יכולה להתחיל את היום בבטחה.',
     2: 'שתיים - מוגנת פעמיים.',
@@ -867,9 +889,12 @@
   }
 
   function startTimer(){
+    // לחיצה כפולה מהירה: אם כבר רץ טיימר שהתחיל לפני פחות מ-90 שניות, מתעלמים.
+    const prev = parseInt(store.get('riki_applied_at')||'0',10);
+    if(prev > 0 && Date.now() - prev < 90*1000) return;
     appliedAt = Date.now();
-    store.set('riki_applied_at', String(appliedAt));
     logTap();
+    store.set('riki_applied_at', String(appliedAt));
     showTimerUI();
     if(uvKnown) applyScreen();
     tick();
