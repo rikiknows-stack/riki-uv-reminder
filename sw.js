@@ -1,10 +1,12 @@
 // ריקי תחדשי לי - Service Worker
 // שתי עבודות: קאש של המעטפת (שהאפליקציה תיפתח גם בלי רשת) והתראות פוש.
 // מעלים את מספר הגרסה בכל שינוי בקבצים - זה מה שמפעיל ניקוי קאש ישן.
-const CACHE = 'riki-uv-v8';
+const CACHE = 'riki-uv-v9';
 
 // המעטפת בלבד. נתוני UV לעולם לא נכנסים לקאש -
 // נתון שמש ישן גרוע יותר מ"ריקי לא רואה את השמש כרגע".
+// מקאשים כל קובץ בנפרד - קובץ חסר (למשל שם מניפסט שונה) לא מפיל את כל ההתקנה.
+// addAll נכשל כולו על קובץ אחד חסר - וזה בדיוק מה שגרם למסך הלבן.
 const SHELL = [
   './',
   './index.html',
@@ -16,8 +18,7 @@ const SHELL = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE)
-      .then(c => c.addAll(SHELL))
-      .catch(() => {}) // קובץ חסר לא יפיל את ההתקנה
+      .then(c => Promise.allSettled(SHELL.map(u => c.add(u))))
       .then(() => self.skipWaiting())
   );
 });
